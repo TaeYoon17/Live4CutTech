@@ -50,7 +50,7 @@ actor VideoExecutor{
                     self.minDuration = min(secondsLength,self.minDuration)
                     let cnt = self.fetchItems.count
                     
-                    let tempFileURL = try await self.moveAssetDirToTempDir(urlAsset: urlAsset)
+                    let tempFileURL = try await self.moveAssetDirToTempDir(urlAsset: &urlAsset)
                     
                     self.fetchItems.append(AVAssetContainer(id: asset.localIdentifier, idx: cnt, minDuration: 1000,
                                                             originalAssetURL: tempFileURL.absoluteString))
@@ -77,7 +77,7 @@ actor VideoExecutor{
 }
 
 extension VideoExecutor {
-    nonisolated fileprivate func moveAssetDirToTempDir(urlAsset: AVURLAsset) async throws -> URL{
+    nonisolated fileprivate func moveAssetDirToTempDir(urlAsset: inout AVURLAsset) async throws -> URL{
         let lastComponent = urlAsset.url.lastPathComponent
         let tempFileURL = FileManager().temporaryDirectory.appendingPathComponent(lastComponent)
         if FileManager.default.fileExists(atPath: tempFileURL.path()) {
