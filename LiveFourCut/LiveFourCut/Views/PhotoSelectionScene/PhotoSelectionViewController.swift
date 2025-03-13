@@ -46,7 +46,7 @@ final class PhotoSelectionViewController: LoadingVC{
     override func viewDidLoad() {
         super.viewDidLoad()
         Task{
-            thumbnailExecutor.thumbnailsSubject
+            await thumbnailExecutor.thumbnailsSubject
                 .receive(on: RunLoop.main)
                 .sink {[weak self] containers in
                     self?.thumbnailSelectorView.imageContainers = containers
@@ -58,7 +58,7 @@ final class PhotoSelectionViewController: LoadingVC{
                     self?.reSelectPhotoBtn.isHidden = !pagingAvailable
                     self?.isPagingEnabled = pagingAvailable
                 }.store(in: &cancellable)
-            thumbnailExecutor.progressSubject.receive(on: RunLoop.main)
+            await thumbnailExecutor.progressSubject.receive(on: RunLoop.main)
                 .sink { [weak self] progressNumber in
                     guard let self else {return}
                     UIView.animate(withDuration: 0.2) {
@@ -70,11 +70,11 @@ final class PhotoSelectionViewController: LoadingVC{
                         self.pregress.progress = progressNumber
                     }
                 }.store(in: &cancellable)
-            videoExecutor.progressSubject.receive(on: RunLoop.main)
+            await videoExecutor.progressSubject.receive(on: RunLoop.main)
                 .sink { [weak self] progressNumber in
                     self?.loadingProgressView?.progress = progressNumber
                 }.store(in: &cancellable)
-            videoExecutor.videosSubject.sink { [weak self] avassetContainers in
+            await videoExecutor.videosSubject.sink { [weak self] avassetContainers in
                 let orderIdentifiers = self?.vm.selectImageContainerSubject.value.compactMap({$0}).map(\.id)
                 guard let orderIdentifiers, orderIdentifiers.count == self?.frameCount else {
                     fatalError("왜 여기 있지?")
@@ -157,8 +157,7 @@ final class PhotoSelectionViewController: LoadingVC{
         pregress.isHidden = true
         selectDoneBtn.action = { [weak self] in
             guard let self else {return}
-            presentLoadingAlert(message: "라이브 포토 영상으로 변환 중...", cancelAction: { [weak self] in
-            })
+            presentLoadingAlert(message: "라이브 포토 영상으로 변환 중...", cancelAction: {})
             Task{
                 await self.videoExecutor.run()
             }
@@ -207,7 +206,6 @@ extension PhotoSelectionViewController:PHPickerViewControllerDelegate{
         }
         self.dismiss(animated: true){[weak self] in
             if assets.count == 0{
-                print(self?.isPagingEnabled)
                 if !(self?.isPagingEnabled ?? false){
                     self?.navigationController?.popViewController(animated: true)
                 }
