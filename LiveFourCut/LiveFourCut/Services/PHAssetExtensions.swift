@@ -18,9 +18,11 @@ extension PHAsset{
                 let image = self!.coreDownSample(resource: imageSource,size: size)
                 continuation.resume(returning: image)
             }
+            
         }
     }
     private func coreDownSample(resource:CGImageSource,size:CGSize? = nil) -> UIImage{
+        
         let scale = UIScreen.main.scale
         let screenSize = UIScreen.main.bounds
         let maxPixel = if let size{
@@ -35,6 +37,33 @@ extension PHAsset{
             kCGImageSourceThumbnailMaxPixelSize: maxPixel
         ] as CFDictionary
         return if let downSampledImage = CGImageSourceCreateThumbnailAtIndex(resource, 0, downSampleOptions){
+            UIImage(cgImage: downSampledImage)
+        }else{
+            UIImage(resource: .hanroro1)
+        }
+    }
+}
+extension UIImage{
+    private func coreDownSample(size:CGSize? = nil) -> UIImage{
+        let imageSourceOption = [kCGImageSourceShouldCache: false] as CFDictionary
+        let data = self.pngData() as! CFData
+        let imageSource: CGImageSource = CGImageSourceCreateWithData(data, imageSourceOption)!
+//        CGImageSourceCreateWithURL(imageURL as CFURL, imageSourceOption)!
+        
+        let scale = UIScreen.main.scale
+        let screenSize = UIScreen.main.bounds
+        let maxPixel = if let size{
+             max(size.width, size.height) * scale
+        }else{
+            max(screenSize.width,screenSize.height) * scale
+        }
+        let downSampleOptions = [
+            kCGImageSourceCreateThumbnailFromImageAlways: true,
+            kCGImageSourceShouldCacheImmediately: true,
+            kCGImageSourceCreateThumbnailWithTransform: true,
+            kCGImageSourceThumbnailMaxPixelSize: maxPixel
+        ] as CFDictionary
+        return if let downSampledImage = CGImageSourceCreateThumbnailAtIndex(imageSource, 0, downSampleOptions){
             UIImage(cgImage: downSampledImage)
         }else{
             UIImage(resource: .hanroro1)

@@ -123,18 +123,20 @@ extension UIImage{
 }
 extension CGRect{
     static func cropFromCenter(width:CGFloat,height:CGFloat,ratio targetRatio:CGFloat = 1) -> Self{
+        let currentRatio = width / height
         var yOffset:CGFloat = 0
         var xOffset:CGFloat = 0
-        var height:CGFloat = height
-        var width:CGFloat = width
-        if width < height{
-            yOffset = (height - width * targetRatio)  * 0.5
-            height = width * targetRatio
+        var cropHeight:CGFloat = height
+        var cropWidth:CGFloat = width
+        if currentRatio > targetRatio{
+            cropWidth = height * targetRatio
+            xOffset = (width - cropWidth) * 0.5
+            
         }else{
-            xOffset = (width - height * targetRatio) * 0.5
-            width = height * targetRatio
+            cropHeight = width / targetRatio
+            yOffset = (height - cropHeight) * 0.5
         }
-        let cropSize = CGRect(x: xOffset, y: yOffset, width: width, height: height)
+        let cropSize = CGRect(x: xOffset, y: yOffset, width: cropWidth, height: cropHeight)
         return cropSize
     }
 }

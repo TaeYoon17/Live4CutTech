@@ -29,6 +29,10 @@ actor LPtoAVService: NSObject{
     }
     var minDuration:Float = 1000
     let wow: PassthroughSubject<[AVURLAsset],Never> = .init()
+    
+    private let videoManagerManager: PHCachingImageManager = .init()
+    private var fetchAssets:[PHAsset] = []
+    
     override init() {
         super.init()
     }

@@ -110,5 +110,5 @@ extension CGContext{
     }
 }
 extension CGSize{
-    var ratio:CGFloat{ self.height / self.width }
+    var ratio:CGFloat{ self.width / self.height }
 }
