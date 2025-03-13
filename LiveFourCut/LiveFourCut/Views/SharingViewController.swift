@@ -43,7 +43,8 @@ class SharingViewController: BaseVC {
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         self.playerLayer?.frame = view.bounds
-        self.playerLayer?.videoGravity = .resize
+        self.playerLayer?.frame = self.videoFrameView.bounds
+        self.playerLayer?.videoGravity = .resizeAspectFill
     }
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
@@ -100,7 +101,6 @@ class SharingViewController: BaseVC {
     }
     override func configureView() {
         super.configureView()
-
         self.shareBtn.addAction(.init(handler: {[weak self] action in
             guard let self else {return}
             guard let url = videoURL else { return }
@@ -119,7 +119,7 @@ class SharingViewController: BaseVC {
         self.queuePlayer.items()
         self.looper = AVPlayerLooper(player: queuePlayer,templateItem: playerItem)
         self.playerLayer = playerLayer
-        
+        self.playerLayer?.videoGravity = .resizeAspectFill
         self.videoFrameView.backgroundColor = .white
         self.videoFrameView.layer.masksToBounds = true
         self.videoFrameView.layer.addSublayer(playerLayer)

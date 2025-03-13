@@ -32,8 +32,7 @@ final class FrameGenerator:FrameServiceProtocol{
             for offset in 0..<frameCount {
                 let singleFrameImages = (0..<groupCount).map{ groupImage[$0][offset] }
                 taskGroup.addTask {
-                    let reduceImage = try! self.reduce(images: singleFrameImages, spacing: 10)
-
+                    let reduceImage = try! self.reduce(images: singleFrameImages, spacing: 4)
                     return (offset,reduceImage)
                 }
             }
@@ -55,7 +54,8 @@ extension FrameGenerator{
             let flippedImg = try! $0.flipImageHorizontal()!
             let (height,width) = (CGFloat(flippedImg.height),CGFloat(flippedImg.width))
             let centerCropSize = CGRect.cropFromCenter(width: width, height: height,ratio: frameTargetSize.ratio)
-            return flippedImg.cropping(to: centerCropSize)!.makeRoundedCorner(radius: frameCornerRadius  * centerCropSize.width / frameTargetSize.width)!
+            return flippedImg.cropping(to: centerCropSize)!
+//                .makeRoundedCorner(radius: frameCornerRadius  * centerCropSize.width / frameTargetSize.width)!
         }
         let nW = 0.5 * frameTargetSize.width - 1.5 * spacing
         let nH = 0.5 * frameTargetSize.height - 1.5 * spacing
@@ -100,10 +100,13 @@ extension CGContext{
         let bytesPerRow = cgImage.bytesPerRow
         let colorSpace = cgImage.colorSpace
         let bitmapInfo = cgImage.bitmapInfo
-        return CGContext(data: nil, width: width, height: height, bitsPerComponent: bitsPerComponent,
-                                      bytesPerRow: bytesPerRow,
-                                      space: colorSpace!,
-                                      bitmapInfo: bitmapInfo.rawValue)
+        return CGContext(data: nil,
+                         width: width,
+                         height: height,
+                         bitsPerComponent: bitsPerComponent,
+                         bytesPerRow: bytesPerRow,
+                         space: colorSpace!,
+                         bitmapInfo: bitmapInfo.rawValue)
     }
 }
 extension CGSize{
