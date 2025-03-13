@@ -23,25 +23,15 @@ class SharingViewController: BaseVC {
         label.font = .systemFont(ofSize: 18,weight: .regular)
         return label
     }()
-    /// 공유할 영상의 저장 위치 URL
-    /// FlipBook에서는 해당 영상 URL에 대한 최적화를 진행함.(FlipBookAssetWriter.makeFileOutputURL(String))
-    var videoURL: URL?
-//    = URL(string: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4")
-    lazy private var player: AVPlayer = {
-        guard let url = videoURL else {
-            fatalError("영상 URL이 제공되지 않았습니다.")
-        }
-        return AVPlayer(url: url)
-    }()
     let videoFrameView = UIView()
     let bottomFrameView = UIView()
     let navigationBackButton = NavigationBackButton()
-    let shareBtn = ShareBtn()
-    lazy private var playerLayer: AVPlayerLayer = AVPlayerLayer(player: player)
-    lazy private var shareBarButtonItem = UIBarButtonItem(barButtonSystemItem: .action,
-                                                          target: self,
-                                                          action: #selector(share(_:)))
     
+    var videoURL: URL?
+    let shareBtn = ShareBtn()
+    private var playerLayer: AVPlayerLayer?
+    private var queuePlayer = AVQueuePlayer()
+    private var looper:AVPlayerLooper?
     // MARK: - Life Cycle
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -52,8 +42,8 @@ class SharingViewController: BaseVC {
     
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
-        playerLayer.frame = view.bounds
-        playerLayer.videoGravity = .resize
+        self.playerLayer?.frame = view.bounds
+        self.playerLayer?.videoGravity = .resize
     }
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
@@ -110,26 +100,30 @@ class SharingViewController: BaseVC {
     }
     override func configureView() {
         super.configureView()
-//        self.videoFrameView.backgroundColor = .red
-//        playerLayer = self.videoFrameView.layer
-        self.videoFrameView.backgroundColor = .red
-//        playerLayer.videoGravity = .resize
-        self.videoFrameView.layer.masksToBounds = true
-        self.videoFrameView.layer.addSublayer(playerLayer)
+
         self.shareBtn.addAction(.init(handler: {[weak self] action in
             guard let self else {return}
-            guard let url = videoURL else {
-                return
-            }
+            guard let url = videoURL else { return }
             let activityViewController = UIActivityViewController(activityItems: [url], applicationActivities: nil)
-//            activityViewController.popoverPresentationController?.barButtonItem = action
             present(activityViewController, animated: true)
         }), for: .touchUpInside)
     }
     private func setupConstraints(){ }
     
     private func setupPlayer() {
-        self.player.play()
+        guard let videoURL else { return }
+        let playerLayer = AVPlayerLayer(player: queuePlayer)
+        let playerItem = AVPlayerItem(url: videoURL)
+        self.queuePlayer.replaceCurrentItem(with: playerItem)
+        self.queuePlayer.isMuted = true
+        self.queuePlayer.items()
+        self.looper = AVPlayerLooper(player: queuePlayer,templateItem: playerItem)
+        self.playerLayer = playerLayer
+        
+        self.videoFrameView.backgroundColor = .white
+        self.videoFrameView.layer.masksToBounds = true
+        self.videoFrameView.layer.addSublayer(playerLayer)
+        self.queuePlayer.play()
     }
     
     // MARK: - Functions
@@ -138,14 +132,21 @@ class SharingViewController: BaseVC {
         guard let url = videoURL else {
             return
         }
-        let activityViewController = UIActivityViewController(activityItems: [url], applicationActivities: nil)
+        let activityViewController = UIActivityViewController(
+            activityItems: [url],
+            applicationActivities: nil
+        )
         activityViewController.popoverPresentationController?.barButtonItem = sender
         present(activityViewController, animated: true)
     }
     
     // MARK: - Deinitializer
     
-    deinit { player.pause() }
+    deinit {
+        queuePlayer.pause()
+        self.looper = nil
+        self.playerLayer = nil
+    }
     
     
 }

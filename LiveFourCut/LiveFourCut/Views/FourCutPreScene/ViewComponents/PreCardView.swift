@@ -49,7 +49,6 @@ extension FourCutPreViewController.PreFourFrameView{
             let playerLayer = AVPlayerLayer(player: self.queuePlayer)
             playerLayer.videoGravity = .resizeAspectFill
             self.queuePlayer.isMuted = true
-            self.queuePlayer.items()
             self.playerLayer = playerLayer
             self.layer.addSublayer(playerLayer)
             setupConstraints()
