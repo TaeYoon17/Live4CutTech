@@ -40,7 +40,7 @@ actor VideoExecutor{
         let resultCount = result.count
         self.progressSubject.send(0)
         result.enumerateObjects(options:.concurrent) { asset, val, idx in
-            let convertedIdentifier = asset.localIdentifier.replacingOccurrences(of: "/", with: "_")
+            _ = asset.localIdentifier.replacingOccurrences(of: "/", with: "_")
             Task{
                 do{
                     var urlAsset:AVURLAsset = try await asset.convertToAVURLAsset()
