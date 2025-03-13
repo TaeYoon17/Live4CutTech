@@ -23,8 +23,8 @@ protocol FrameServiceProtocol{
 }
 final class FrameGenerator:FrameServiceProtocol{
     var frameType:FrameType = .basic2x2
-    var frameTargetSize: CGSize = .init(width: 300, height: 400)
-    var frameCornerRadius: CGFloat = 40
+    var frameTargetSize: CGSize = .init(width: 300, height: 300 * 1.77)
+    var frameCornerRadius: CGFloat = 0
     func groupReduce(groupImage: [[CGImage]],spacing: CGFloat) async throws -> [CGImage]{
         let frameCount = groupImage.first!.count
         let groupCount = groupImage.count
@@ -65,7 +65,7 @@ extension FrameGenerator{
         let rdRect = CGRect.init(x: nW + 2 * spacing, y: nH + 2 * spacing, width: nW, height: nH)
         let render = UIGraphicsImageRenderer(size: frameTargetSize)
         let imageData = render.image { context in
-            context.cgContext.setFillColor(UIColor.blue.cgColor)
+            context.cgContext.setFillColor(UIColor.black.cgColor)
             context.cgContext.beginPath()
             let roundedPath2 = CGPath.init(roundedRect: .init(origin: .zero, size: frameTargetSize),
                                            cornerWidth: frameCornerRadius, cornerHeight: frameCornerRadius, transform: nil)
