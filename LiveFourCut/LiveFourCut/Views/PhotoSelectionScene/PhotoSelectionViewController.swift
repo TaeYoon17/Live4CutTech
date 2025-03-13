@@ -127,7 +127,8 @@ final class PhotoSelectionViewController: LoadingVC{
         }
         thumbnailFrameView.snp.makeConstraints {
             $0.top.equalTo(descLabel.snp.bottom).offset(18)
-            $0.horizontalEdges.equalToSuperview().inset(24)
+            $0.horizontalEdges.equalToSuperview().inset(50)
+            $0.height.equalTo(thumbnailFrameView.snp.width).multipliedBy(1.77)
         }
         bottomView.snp.makeConstraints { make in
             make.top.equalTo(thumbnailFrameView.snp.bottom)

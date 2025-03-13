@@ -94,12 +94,8 @@ class FrameSelectionViewController: UIViewController {
     // MARK: - Setup
     
     private func setupUI(){
-        [frameLabel,
-         descLabel,
-         outerFrameView,
-        ].forEach { self.view.addSubview($0) }
+        [frameLabel, descLabel, outerFrameView].forEach { self.view.addSubview($0) }
         outerFrameView.addSubview(infoStackView)
-        
     }
     
     private func setupConstraints() {

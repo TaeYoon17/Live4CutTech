@@ -52,7 +52,7 @@ extension FourCutPreViewController{
             [upperStack,lowerStack].forEach{ addArrangedSubview($0) }
             self.axis = .vertical
             self.alignment = .fill
-            self.distribution = .fill
+            self.distribution = .fillEqually
             self.spacing = frameSpacing
             self.backgroundColor = .black
             self.isLayoutMarginsRelativeArrangement = true

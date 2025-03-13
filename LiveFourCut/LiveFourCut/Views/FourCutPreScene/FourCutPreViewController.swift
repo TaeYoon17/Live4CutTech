@@ -68,7 +68,8 @@ final class FourCutPreViewController: BaseVC{
         }
         preFourFrameView.snp.makeConstraints { make in
             make.top.equalTo(descLabel.snp.bottom).offset(12)
-            make.horizontalEdges.equalToSuperview().inset(24)
+            make.horizontalEdges.equalToSuperview().inset(50)
+            make.height.equalTo(preFourFrameView.snp.width).multipliedBy(1.77)
         }
         bottomFrameView.snp.makeConstraints { make in
             make.top.equalTo(preFourFrameView.snp.bottom)
@@ -93,11 +94,6 @@ final class FourCutPreViewController: BaseVC{
     }
     override func configureView() {
         self.view.backgroundColor = .systemBackground
-//        let extractionVC = ExtractionViewController()
-//        extractionVC.avAssetContainers = self.avAssetContainers
-//        print(extractionVC.avAssetContainers?.count)
-//        extractionVC.minDuration = self.minDuration
-//        extractionVC.isLaunch = false
         
         shareBtn.action = {[weak self] in
             guard let self else { return }

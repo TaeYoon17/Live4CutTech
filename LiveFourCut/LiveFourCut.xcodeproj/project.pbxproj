@@ -791,6 +791,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = LiveFourCut/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Live4Cut;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.photography";
 				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "사진 추가 좀";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "사진 좀";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -827,6 +828,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = LiveFourCut/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Live4Cut;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.photography";
 				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "사진 추가 좀";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "사진 좀";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;

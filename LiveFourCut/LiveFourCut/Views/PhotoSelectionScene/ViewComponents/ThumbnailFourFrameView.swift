@@ -54,7 +54,7 @@ extension PhotoSelectionViewController {
             }
             self.axis = .vertical
             self.alignment = .fill
-            self.distribution = .fill
+            self.distribution = .fillEqually
             self.spacing = frameSpacing
             self.backgroundColor = .black
             self.isLayoutMarginsRelativeArrangement = true
