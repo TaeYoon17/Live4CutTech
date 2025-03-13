@@ -18,10 +18,17 @@ final class PhotoSelectionViewController: LoadingVC{
     let pregress = UIProgressView(progressViewStyle: .bar)
     let reSelectPhotoBtn = ReSelectPhotoBtn()
     let navigationBackButton = NavigationBackButton()
+    
     let titleLabel: UILabel = {
+        var label = UILabel()
+        label.text = "이미지 선택"
+        label.font = .systemFont(ofSize: 30, weight: .bold)
+        return label
+    }()
+    let descLabel: UILabel = {
         let label = UILabel()
-        label.text = "순서대로 선택하소~"
-        label.font = .systemFont(ofSize: 25, weight: .bold)
+        label.text = "라이브로 찍은 이미지를 골라주세요!"
+        label.font = .systemFont(ofSize: 18,weight: .regular)
         return label
     }()
     private let bottomView: UIView = .init()
@@ -77,7 +84,8 @@ final class PhotoSelectionViewController: LoadingVC{
             await videoExecutor.videosSubject.sink { [weak self] avassetContainers in
                 let orderIdentifiers = self?.vm.selectImageContainerSubject.value.compactMap({$0}).map(\.id)
                 guard let orderIdentifiers, orderIdentifiers.count == self?.frameCount else {
-                    fatalError("왜 여기 있지?")
+//                    fatalError("왜 여기 있지?")
+                    return
                 }
                 var avassetContainers = avassetContainers
                 let orderAssetContainers:[AVAssetContainer] = orderIdentifiers.map{ identifier in
@@ -105,16 +113,20 @@ final class PhotoSelectionViewController: LoadingVC{
         super.viewDidAppear(animated)
     }
     override func configureLayout() {
-        [titleLabel,thumbnailFrameView,bottomView].forEach{ view.addSubview($0) }
+        [titleLabel,descLabel,thumbnailFrameView,bottomView].forEach{ view.addSubview($0) }
         [thumbnailSelectorView,selectDoneBtn,pregress,reSelectPhotoBtn].forEach{bottomView.addSubview($0)}
     }
     override func configureConstraints() {
         titleLabel.snp.makeConstraints { make in
-            make.top.equalTo(view.safeAreaLayoutGuide).offset(42)
+            make.top.equalTo(view.safeAreaLayoutGuide).offset(8)
+            make.centerX.equalToSuperview()
+        }
+        descLabel.snp.makeConstraints { make in
+            make.top.equalTo(titleLabel.snp.bottom).offset(11)
             make.centerX.equalToSuperview()
         }
         thumbnailFrameView.snp.makeConstraints {
-            $0.top.equalTo(titleLabel.snp.bottom).offset(12)
+            $0.top.equalTo(descLabel.snp.bottom).offset(18)
             $0.horizontalEdges.equalToSuperview().inset(24)
         }
         bottomView.snp.makeConstraints { make in
@@ -154,6 +166,7 @@ final class PhotoSelectionViewController: LoadingVC{
     override func configureView() {
         self.view.backgroundColor = .systemBackground
         pregress.backgroundColor = .lightGray
+        pregress.tintColor = .black
         pregress.isHidden = true
         selectDoneBtn.action = { [weak self] in
             guard let self else {return}

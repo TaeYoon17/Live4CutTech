@@ -16,14 +16,20 @@ final class FourCutPreViewController: BaseVC{
     //MARK: -- View 저장 프로퍼티
     private let preFourFrameView = PreFourFrameView()
     private let navigationBackButton = NavigationBackButton()
+    private let bottomFrameView = UIView()
     let titleLabel: UILabel = {
         let label = UILabel()
-        label.text = "공유하소~"
-        label.font = .systemFont(ofSize: 25, weight: .bold)
+        label.text = "이미지 선택"
+        label.font = .systemFont(ofSize: 30, weight: .bold)
+        return label
+    }()
+    let descLabel: UILabel = {
+        let label = UILabel()
+        label.text = "이미지 선택을 완료하였습니다!\n원하는 이미지가 맞는지 재확인해주세요 :)"
+        label.font = .systemFont(ofSize: 18,weight: .regular)
         return label
     }()
     let shareBtn = DoneBtn(title: "4컷 영상 추출하러가기")
-    let replayBtn = DescriptionBtn(title: "다시 재생하기")
     var minDuration: Float = 0{
         didSet{ 
             preFourFrameView.minDuration = minDuration
@@ -47,25 +53,32 @@ final class FourCutPreViewController: BaseVC{
         
     }
     override func configureLayout() {
-        [titleLabel,preFourFrameView,shareBtn,replayBtn].forEach({ view.addSubview($0) })
+        [titleLabel,descLabel,preFourFrameView,
+         bottomFrameView].forEach({ view.addSubview($0) })
+        bottomFrameView.addSubview(shareBtn)
     }
     override func configureConstraints() {
         titleLabel.snp.makeConstraints { make in
-            make.top.equalTo(view.safeAreaLayoutGuide).offset(42)
+            make.top.equalTo(view.safeAreaLayoutGuide).offset(8)
+            make.centerX.equalToSuperview()
+        }
+        descLabel.snp.makeConstraints { make in
+            make.top.equalTo(titleLabel.snp.bottom).offset(11)
             make.centerX.equalToSuperview()
         }
         preFourFrameView.snp.makeConstraints { make in
-            make.top.equalTo(titleLabel.snp.bottom).offset(12)
+            make.top.equalTo(descLabel.snp.bottom).offset(12)
             make.horizontalEdges.equalToSuperview().inset(24)
+        }
+        bottomFrameView.snp.makeConstraints { make in
+            make.top.equalTo(preFourFrameView.snp.bottom)
+            make.leading.trailing.equalToSuperview()
+            make.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom)
         }
         shareBtn.snp.makeConstraints { make in
             make.height.equalTo(50)
             make.horizontalEdges.equalToSuperview().inset(24)
-            make.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom).inset(60)
-        }
-        replayBtn.snp.makeConstraints { make in
-            make.top.equalTo(shareBtn.snp.bottom).offset(8)
-            make.centerX.equalToSuperview()
+            make.centerY.equalToSuperview()
         }
     }
     override func configureNavigation() {
@@ -122,12 +135,7 @@ final class FourCutPreViewController: BaseVC{
                     _ = interactionEnabled()
                 }
             }
-//            self.navigationController?.pushViewController(extractionVC, animated: true)
         }
-        replayBtn.action = {
-            self.preFourFrameView.play()
-        }
-        replayBtn.isHidden = true
     }
     
 }
