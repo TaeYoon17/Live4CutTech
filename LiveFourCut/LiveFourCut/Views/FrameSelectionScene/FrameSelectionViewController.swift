@@ -16,75 +16,56 @@ class FrameSelectionViewController: UIViewController {
     let frameLabel: UILabel = {
         var label = UILabel()
         
-        label.text = "프레임 선택하소~"
-        label.font = .systemFont(ofSize: 25, weight: .bold)
+        label.text = "이미지 선택"
+        label.font = .systemFont(ofSize: 30, weight: .bold)
         
         return label
     }()
-    
-    /// 2 프레임 View
-    var twoFrameStackView: UIStackView = {
-        let stackView = UIStackView()
-        stackView.axis = .horizontal
-        stackView.layer.cornerRadius = 20
-        stackView.distribution = .fillEqually
-        stackView.spacing = 10
-        stackView.backgroundColor = .systemGray3
-        
-        stackView.isLayoutMarginsRelativeArrangement = true
-        stackView.layoutMargins = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
-        
-        stackView.isUserInteractionEnabled = true
-        stackView.tag = 1
-        
-        return stackView
+    let descLabel: UILabel = {
+        let label = UILabel()
+        label.text = "라이브로 찍은 이미지를 골라주세요!"
+        label.font = .systemFont(ofSize: 20,weight: .regular)
+        return label
     }()
     
-    /// 프레임 구분선
-    let divider: UIView = {
-        var view = UIView()
-        
-        view.backgroundColor = .black
-        
+    lazy var outerFrameView:UIView = {
+        let view = UIView()
+        view.layer.borderWidth = 3
+        view.layer.borderColor = UIColor.black.cgColor
+        view.layer.cornerRadius = 12
+        view.backgroundColor = .white
+        view.isUserInteractionEnabled = true
+        view.layoutMargins = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
         return view
     }()
     
-    /// /// 4 프레임 View
-    var fourFrameStackView: UIStackView = {
+    private lazy var infoStackView: UIStackView = {
         let stackView = UIStackView()
-        
         stackView.axis = .vertical
-        stackView.layer.cornerRadius = 20
         stackView.distribution = .fillEqually
-        stackView.spacing = 10
-        stackView.backgroundColor = .systemGray3
-        
-        stackView.isLayoutMarginsRelativeArrangement = true
-        stackView.layoutMargins = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
-        
-        stackView.isUserInteractionEnabled = true
-        stackView.tag = 2
-        
+        stackView.spacing = 20
+        stackView.addArrangedSubview(infoImageVIew)
+        stackView.addArrangedSubview(infoLabel)
         return stackView
     }()
     
-    /// 4 프레임 상단 StackView
-    var upperRowStackView: UIStackView = {
-        let stackView = UIStackView()
-        stackView.axis = .horizontal
-        stackView.distribution = .fillEqually
-        stackView.spacing = 10
-        return stackView
+    private var infoImageVIew: UIImageView = {
+        var imageView = UIImageView()
+        imageView.contentMode = .scaleAspectFit
+        imageView.image = .empty
+        return imageView
     }()
     
-    /// 4 프레임 하단  StackView
-    var lowerRowStackView: UIStackView = {
-        let stackView = UIStackView()
-        stackView.axis = .horizontal
-        stackView.distribution = .fillEqually
-        stackView.spacing = 10
-        return stackView
+    private var infoLabel: UILabel = {
+       let label = UILabel()
+        label.text = "라이브 이미지 4장을\n업로드 해주세요!"
+        label.textAlignment = .center
+        label.numberOfLines = 0
+        label.font = .systemFont(ofSize: 20, weight: .semibold)
+        label.textColor = .black
+        return label
     }()
+    
     
     // MARK: - Life Cycle
     
@@ -95,16 +76,15 @@ class FrameSelectionViewController: UIViewController {
         self.navigationController?.setNavigationBarHidden(true, animated: false)
         self.title = "프레임 선택"
         
-        let twoFrameTapGesture = UITapGestureRecognizer(target: self, 
-                                                        action: #selector(frameStackViewTapped(_:)))
-        let fourFrameTapGesture = UITapGestureRecognizer(target: self, 
-                                                         action: #selector(frameStackViewTapped(_:)))
+        let fourFrameTapGesture = UITapGestureRecognizer(
+            target: self,
+            action: #selector(frameStackViewTapped(_:))
+        )
         
-        twoFrameStackView.addGestureRecognizer(twoFrameTapGesture)
-        fourFrameStackView.addGestureRecognizer(fourFrameTapGesture)
-        
+        outerFrameView.addGestureRecognizer(fourFrameTapGesture)
         self.setupUI()
         self.setupConstraints()
+
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -114,54 +94,26 @@ class FrameSelectionViewController: UIViewController {
     // MARK: - Setup
     
     private func setupUI(){
-        [frameLabel,
-         twoFrameStackView,
-         divider,
-         fourFrameStackView].forEach { self.view.addSubview($0) }
-        
-        // 2 프레임 Card 추가
-        for i in 0..<2 {
-            let frameView = CardView(image: UIImage(named:i == 0 ? "Hanroro1" : "Hanroro2"),number: nil)
-            twoFrameStackView.addArrangedSubview(frameView)
-        }
-        
-        // 4 프레임 Card 추가
-        [upperRowStackView, lowerRowStackView].forEach { fourFrameStackView.addArrangedSubview($0) }
-        for i in 0..<2 {
-            let upperFrameView = CardView(image: UIImage(named: i == 0 ? "Hanroro3" : "Hanroro4"), number: nil)
-
-            let lowerFrameView = CardView(number: i+2)
-            upperRowStackView.addArrangedSubview(upperFrameView)
-            lowerRowStackView.addArrangedSubview(lowerFrameView)
-        }
-        
+        [frameLabel, descLabel, outerFrameView].forEach { self.view.addSubview($0) }
+        outerFrameView.addSubview(infoStackView)
     }
     
     private func setupConstraints() {
-        
         frameLabel.snp.makeConstraints {
             $0.top.equalTo(view.safeAreaLayoutGuide).offset(38)
             $0.centerX.equalToSuperview()
         }
-        
-        twoFrameStackView.snp.makeConstraints {
-            $0.top.equalTo(frameLabel.snp.bottom).offset(45)
-            $0.height.equalTo(181)
-            $0.leading.trailing.equalTo(self.view).inset(80)
-            $0.centerX.equalToSuperview()
+        descLabel.snp.makeConstraints { make in
+            make.top.equalTo(frameLabel.snp.bottom).offset(11)
+            make.centerX.equalToSuperview()
         }
-        
-        divider.snp.makeConstraints {
-            $0.top.equalTo(twoFrameStackView.snp.bottom).offset(30)
-            $0.centerX.equalToSuperview()
-            $0.height.equalTo(1)
-            $0.width.equalTo(200)
+        outerFrameView.snp.makeConstraints { make in
+            make.leading.trailing.equalToSuperview().inset(50)
+            make.centerY.equalTo(self.view.snp.centerY).offset(55)
+            make.height.equalTo(outerFrameView.snp.width).multipliedBy(1.77)
         }
-        fourFrameStackView.snp.makeConstraints {
-            $0.top.equalTo(divider.snp.bottom).offset(30)
-            $0.centerX.equalToSuperview()
-            $0.height.equalTo(352)
-            $0.leading.trailing.equalToSuperview().inset(80)
+        infoStackView.snp.makeConstraints { make in
+            make.center.equalToSuperview()
         }
     }
     
@@ -186,24 +138,15 @@ class FrameSelectionViewController: UIViewController {
     
     /// 프레임이 선택되었을 시 동작 함수
     @objc private func frameStackViewTapped(_ sender: UITapGestureRecognizer) {
-        guard let stackView = sender.view as? UIStackView else { return }
         var frameCount = 0
-        if stackView.tag == 1 {
-            frameCount = 2
-            animateView(stackView) {
-                print("2 Frame Stack View Tapped")
-                let photoSelectionViewController = PhotoSelectionViewController()
-                photoSelectionViewController.frameCount = frameCount
-                self.navigationController?.pushViewController(photoSelectionViewController, animated: true)
-            }
-        } else if stackView.tag == 2 {
-            frameCount = 4
-            animateView(stackView) {
-                print("4 Frame Stack View Tapped")
-                let photoSelectionViewController = PhotoSelectionViewController()
-                photoSelectionViewController.frameCount = frameCount
-                self.navigationController?.pushViewController(photoSelectionViewController, animated: true)
-            }
+        frameCount = 4
+        animateView(sender.view!) {
+            print("4 Frame Stack View Tapped")
+            let photoSelectionViewController = PhotoSelectionViewController()
+            photoSelectionViewController.frameCount = frameCount
+            self.navigationController?.pushViewController(
+                photoSelectionViewController,
+                animated: true)
         }
     }
 }

@@ -13,6 +13,8 @@ final class DoneBtn: UIButton{
         super.init(frame: .zero)
         self.addTarget(self, action: #selector(Self.doneTapped(sender:)), for: .touchUpInside)
         var config = UIButton.Configuration.filled()
+        config.baseBackgroundColor = .black
+        config.baseForegroundColor = .white
         config.attributedTitle = .init(title, attributes: .init([.font: UIFont.systemFont(ofSize: 17, weight: .semibold)]))
         self.configuration = config
     }

@@ -29,6 +29,7 @@ extension PhotoSelectionViewController{
         init(){
             super.init(frame: .zero)
             var config = UIButton.Configuration.plain()
+            config.baseForegroundColor = .black
             config.attributedTitle = .init("사진 재선택", attributes: .init([.font: UIFont.systemFont(ofSize: 15, weight: .medium),
                                                                             .underlineStyle: NSUnderlineStyle.single.rawValue]))
             self.configuration = config

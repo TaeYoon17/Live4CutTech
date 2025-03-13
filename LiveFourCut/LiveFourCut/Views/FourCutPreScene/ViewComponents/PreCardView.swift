@@ -49,7 +49,6 @@ extension FourCutPreViewController.PreFourFrameView{
             let playerLayer = AVPlayerLayer(player: self.queuePlayer)
             playerLayer.videoGravity = .resizeAspectFill
             self.queuePlayer.isMuted = true
-            self.queuePlayer.items()
             self.playerLayer = playerLayer
             self.layer.addSublayer(playerLayer)
             setupConstraints()
@@ -69,16 +68,12 @@ extension FourCutPreViewController.PreFourFrameView{
             }
         }
         private func setupView() {
-            self.backgroundColor = .systemGray
-            self.layer.cornerRadius = 10
+            self.backgroundColor = .white
             self.contentMode = .scaleAspectFill // 이미지가 상하or좌우에 꽉 차도록 설정
             self.clipsToBounds = true // 벗어나는 범위는 자름
         }
         func play(){
-            Task{
-                print("재생이 눌림")
-                queuePlayer.play()
-            }
+            Task{ queuePlayer.play() }
         }
     }
 }

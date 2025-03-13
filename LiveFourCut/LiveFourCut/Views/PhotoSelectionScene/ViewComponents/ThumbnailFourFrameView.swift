@@ -26,15 +26,15 @@ extension PhotoSelectionViewController {
             }
         }
         var selector:[Bool] = Array(repeating: false, count: 4)
+        let frameSpacing: CGFloat = 4
         private var imageViews:[ThumbnailCardView] = (0..<4).map{ThumbnailCardView(image: nil, number: $0 + 1)}
-        //        .enumerated().reduce(into: [:]) { $0[$1.offset] = $1.element }
         private lazy var upperStack = {
             let subViews = [imageViews[0],imageViews[1]]
             let stView = UIStackView(arrangedSubviews: subViews)
             stView.axis = .horizontal
             stView.alignment = .fill
             stView.distribution = .fillEqually
-            stView.spacing = 10
+            stView.spacing = frameSpacing
             return stView
         }()
         private lazy var lowerStack = {
@@ -43,7 +43,7 @@ extension PhotoSelectionViewController {
             stView.axis = .horizontal
             stView.distribution = .fillEqually
             stView.alignment = .fill
-            stView.spacing = 10
+            stView.spacing = frameSpacing
             return stView
         }()
         var cancellable = Set<AnyCancellable>()
@@ -53,13 +53,12 @@ extension PhotoSelectionViewController {
                 self.addArrangedSubview(item)
             }
             self.axis = .vertical
-            self.layer.cornerRadius = 20
             self.alignment = .fill
-            self.distribution = .fill
-            self.spacing = 10
-            self.backgroundColor = .systemGray3
+            self.distribution = .fillEqually
+            self.spacing = frameSpacing
+            self.backgroundColor = .black
             self.isLayoutMarginsRelativeArrangement = true
-            self.layoutMargins = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
+            self.layoutMargins = UIEdgeInsets(top: frameSpacing, left: frameSpacing, bottom: frameSpacing, right: frameSpacing)
             self.tag = 0
         }
         required init(coder: NSCoder) {

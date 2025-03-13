@@ -25,8 +25,8 @@ class CardView: UIImageView {
 
     lazy var numberLabel: UILabel = {
         let label = UILabel()
-        label.textColor = .white
-        label.font = UIFont.systemFont(ofSize: 15, weight: .bold)
+        label.textColor = .black
+        label.font = UIFont.systemFont(ofSize: 21, weight: .regular)
         return label
     }()
     
@@ -68,8 +68,7 @@ class CardView: UIImageView {
     // MARK: - Functions
 
     private func setupView() {
-        self.backgroundColor = .systemGray
-        self.layer.cornerRadius = 10
+        self.backgroundColor = .white
         self.contentMode = .scaleAspectFill // 이미지가 상하or좌우에 꽉 차도록 설정
         self.clipsToBounds = true // 벗어나는 범위는 자름
     }
