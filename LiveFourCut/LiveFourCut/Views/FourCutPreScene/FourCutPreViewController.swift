@@ -105,7 +105,7 @@ final class FourCutPreViewController: BaseVC{
                 print("minDuration \(self.minDuration)")
                 do{
                     var frameImages = try await self.extractService.extractFrameImages()
-                    var imgDatas:[CGImage] = try await self.frameService.groupReduce(groupImage: frameImages, spacing: 10)
+                    var imgDatas:[CGImage] = try await self.frameService.groupReduce(groupImage: frameImages, spacing: 4)
                     print("추출은 된다. \(frameImages.first?.count)")
                     print("감소는 된다. \(imgDatas.count)")
                     frameImages = [] // 함수 사용 후 스택에서 제거해야한다.

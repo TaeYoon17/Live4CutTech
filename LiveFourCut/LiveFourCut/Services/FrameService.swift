@@ -23,8 +23,8 @@ protocol FrameServiceProtocol{
 }
 final class FrameGenerator:FrameServiceProtocol{
     var frameType:FrameType = .basic2x2
-    var frameTargetSize: CGSize = .init(width: 300, height: 400)
-    var frameCornerRadius: CGFloat = 40
+    var frameTargetSize: CGSize = .init(width: 300, height: 300 * 1.77)
+    var frameCornerRadius: CGFloat = 0
     func groupReduce(groupImage: [[CGImage]],spacing: CGFloat) async throws -> [CGImage]{
         let frameCount = groupImage.first!.count
         let groupCount = groupImage.count
@@ -32,8 +32,7 @@ final class FrameGenerator:FrameServiceProtocol{
             for offset in 0..<frameCount {
                 let singleFrameImages = (0..<groupCount).map{ groupImage[$0][offset] }
                 taskGroup.addTask {
-                    let reduceImage = try! self.reduce(images: singleFrameImages, spacing: 10)
-
+                    let reduceImage = try! self.reduce(images: singleFrameImages, spacing: 4)
                     return (offset,reduceImage)
                 }
             }
@@ -55,7 +54,8 @@ extension FrameGenerator{
             let flippedImg = try! $0.flipImageHorizontal()!
             let (height,width) = (CGFloat(flippedImg.height),CGFloat(flippedImg.width))
             let centerCropSize = CGRect.cropFromCenter(width: width, height: height,ratio: frameTargetSize.ratio)
-            return flippedImg.cropping(to: centerCropSize)!.makeRoundedCorner(radius: frameCornerRadius  * centerCropSize.width / frameTargetSize.width)!
+            return flippedImg.cropping(to: centerCropSize)!
+//                .makeRoundedCorner(radius: frameCornerRadius  * centerCropSize.width / frameTargetSize.width)!
         }
         let nW = 0.5 * frameTargetSize.width - 1.5 * spacing
         let nH = 0.5 * frameTargetSize.height - 1.5 * spacing
@@ -65,7 +65,7 @@ extension FrameGenerator{
         let rdRect = CGRect.init(x: nW + 2 * spacing, y: nH + 2 * spacing, width: nW, height: nH)
         let render = UIGraphicsImageRenderer(size: frameTargetSize)
         let imageData = render.image { context in
-            context.cgContext.setFillColor(UIColor.blue.cgColor)
+            context.cgContext.setFillColor(UIColor.black.cgColor)
             context.cgContext.beginPath()
             let roundedPath2 = CGPath.init(roundedRect: .init(origin: .zero, size: frameTargetSize),
                                            cornerWidth: frameCornerRadius, cornerHeight: frameCornerRadius, transform: nil)
@@ -100,12 +100,15 @@ extension CGContext{
         let bytesPerRow = cgImage.bytesPerRow
         let colorSpace = cgImage.colorSpace
         let bitmapInfo = cgImage.bitmapInfo
-        return CGContext(data: nil, width: width, height: height, bitsPerComponent: bitsPerComponent,
-                                      bytesPerRow: bytesPerRow,
-                                      space: colorSpace!,
-                                      bitmapInfo: bitmapInfo.rawValue)
+        return CGContext(data: nil,
+                         width: width,
+                         height: height,
+                         bitsPerComponent: bitsPerComponent,
+                         bytesPerRow: bytesPerRow,
+                         space: colorSpace!,
+                         bitmapInfo: bitmapInfo.rawValue)
     }
 }
 extension CGSize{
-    var ratio:CGFloat{ self.height / self.width }
+    var ratio:CGFloat{ self.width / self.height }
 }

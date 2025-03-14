@@ -792,8 +792,8 @@
 				INFOPLIST_FILE = LiveFourCut/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Live4Cut;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.photography";
-				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "사진 추가 좀";
-				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "사진 좀";
+				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "앱에서 사진을 내보내기 위해 접근이 필요합니다";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "앱에서 사진을 가져오기 위해 접근이 필요합니다";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIStatusBarStyle = UIStatusBarStyleDarkContent;
@@ -829,8 +829,8 @@
 				INFOPLIST_FILE = LiveFourCut/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Live4Cut;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.photography";
-				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "사진 추가 좀";
-				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "사진 좀";
+				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "앱에서 사진을 내보내기 위해 접근이 필요합니다";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "앱에서 사진을 가져오기 위해 접근이 필요합니다";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIStatusBarStyle = UIStatusBarStyleDarkContent;
