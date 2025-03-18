@@ -5,7 +5,7 @@
 |:--:|:--|
 |로고|<img width="70" alt="" src="https://github.com/user-attachments/assets/5b64ed09-e1d2-48da-92be-0fddccc7c946"> 
 |기간|2024. 07. 02 ~ 진행중|
-|상태|앱스토어 배포 완료 및 업데이트 진행 중(v1.1.5)|
+|상태|앱스토어 배포 중|
 |참여 인원|2명 iOS 개발 4명|
 |기술 스택|UIKit, AVFoundation, PhotoKit, CoreGraphics|
 |앱스토어|[Sqoop 스쿱 - 유튜브 플리 변환](https://apps.apple.com/kr/app/sqoop-%EC%8A%A4%EC%BF%B1/id6736636919)|
