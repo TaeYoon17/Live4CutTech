@@ -25,7 +25,8 @@
 
 - Live Photo 4개를 영상으로 바꾸어 하나의 프레임으로 만들어 저장 및 공유
 
-
+- AVFoundation 연구 정리 문서
+https://sunrise-catfish-561.notion.site/AV-a183ad7b4fe2412bb5ba3c0bfe72d4a6
 
 
 ## :people_hugging: Authors
