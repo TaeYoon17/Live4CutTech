@@ -1,20 +1,24 @@
 # :iphone: Live 4 Cut: 당신의 4종류의 LivePhoto가 네컷으로
-<img src="https://github.com/DeveloperAcademy-POSTECH/2024-NC2-M24-AVFoundation/assets/54929503/5eea34c0-c9e3-49ac-8307-a015671a3735" width="200" />
+> Live Photo를 활용하여 SNS에 공유할 영상을 만들어주는 앱
 
-## : Live Photo를 활용하여 SNS에 공유할 영상을 만들어주는 앱
+|앱 & 팀 이름|Live4Cut & AV연구소|
+|:--:|:--|
+|로고|<img width="70" alt="" src="https://github.com/user-attachments/assets/5b64ed09-e1d2-48da-92be-0fddccc7c946"> 
+|기간|2024. 07. 02 ~ 진행중|
+|상태|앱스토어 배포 완료 및 업데이트 진행 중(v1.1.5)|
+|참여 인원|2명 iOS 개발 4명|
+|기술 스택|UIKit, AVFoundation, PhotoKit, CoreGraphics|
+|앱스토어|[Sqoop 스쿱 - 유튜브 플리 변환](https://apps.apple.com/kr/app/sqoop-%EC%8A%A4%EC%BF%B1/id6736636919)|
 
-## :fireworks: Screenshots
-<img src="https://github.com/DeveloperAcademy-POSTECH/2024-NC2-M24-AVFoundation/assets/54929503/81e89cab-f1a5-4de6-8a77-7b745ee5ac69" width="200"/>
-<img src="https://github.com/DeveloperAcademy-POSTECH/2024-NC2-M24-AVFoundation/assets/54929503/e80ce46a-8688-46d6-840b-9351166b6ae8" width="200"/>
-<img src="https://github.com/DeveloperAcademy-POSTECH/2024-NC2-M24-AVFoundation/assets/54929503/d6e089cf-9c71-4934-ae96-fd5186b48ee9" width="200"/>
-<img src="https://github.com/DeveloperAcademy-POSTECH/2024-NC2-M24-AVFoundation/assets/54929503/7da2503a-f7bc-4c74-bb4a-4a7fdaa685f8" width="200"/>
-<img src="https://github.com/DeveloperAcademy-POSTECH/2024-NC2-M24-AVFoundation/assets/54929503/415e6378-7010-4063-8819-9fe2c63c0747" width="200"/>
-<img src="https://github.com/DeveloperAcademy-POSTECH/2024-NC2-M24-AVFoundation/assets/54929503/13c2c781-808e-4bdc-bf98-a980529a227a" width="200"/>
+### 📱 앱 미리보기
+|온보딩|메인화면|이미지 선택|영상변환|영상공유|
+|:--:|:--:|:--:|:--:|:--:|
+|<img width="130" alt="" src="">|<img width="130" alt="" src="https://github.com/user-attachments/assets/c0c0364d-dd5e-4952-bcf5-3e1f92075d64">|<img width="130" alt="" src="https://github.com/user-attachments/assets/11dcb638-d908-41d4-9d47-9fafd2ddf160">|<img width="130" alt="" src="https://github.com/user-attachments/assets/f92ca630-e5ba-4428-99c3-97b9062e4f07">|<img width="130" alt="" src="https://github.com/user-attachments/assets/90e77985-a7ef-4b61-b575-b0f0c23af0a7">|
 
 
 ## :framed_picture: Demo
 
-<img src="https://github.com/DeveloperAcademy-POSTECH/2024-NC2-M24-AVFoundation/assets/54929503/0895b11d-f3f1-4b9c-a9a6-a3591e0e691e" width="300"/>
+<img src="https://github.com/user-attachments/assets/cb1c46a3-a8e5-431b-982d-92221c2ebfff" width="300"/>
 
 
 ## :pushpin: Features
@@ -22,10 +26,6 @@
 - Live Photo 4개를 영상으로 바꾸어 하나의 프레임으로 만들어 저장 및 공유
 
 
-## :sparkles: Skills & Tech Stack
-
-- UIKit
-- AVFoundation
 
 
 ## :people_hugging: Authors
