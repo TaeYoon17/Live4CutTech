@@ -11,9 +11,9 @@
 |앱스토어|[Sqoop 스쿱 - 유튜브 플리 변환](https://apps.apple.com/kr/app/sqoop-%EC%8A%A4%EC%BF%B1/id6736636919)|
 
 ### 📱 앱 미리보기
-|온보딩|메인화면|이미지 선택|영상변환|영상공유|
-|:--:|:--:|:--:|:--:|:--:|
-|<img width="130" alt="" src="">|<img width="130" alt="" src="https://github.com/user-attachments/assets/c0c0364d-dd5e-4952-bcf5-3e1f92075d64">|<img width="130" alt="" src="https://github.com/user-attachments/assets/11dcb638-d908-41d4-9d47-9fafd2ddf160">|<img width="130" alt="" src="https://github.com/user-attachments/assets/f92ca630-e5ba-4428-99c3-97b9062e4f07">|<img width="130" alt="" src="https://github.com/user-attachments/assets/90e77985-a7ef-4b61-b575-b0f0c23af0a7">|
+|메인화면|이미지 선택|영상변환|영상공유|
+|:--:|:--:|:--:|:--:|
+|<img width="130" alt="" src="https://github.com/user-attachments/assets/c0c0364d-dd5e-4952-bcf5-3e1f92075d64">|<img width="130" alt="" src="https://github.com/user-attachments/assets/11dcb638-d908-41d4-9d47-9fafd2ddf160">|<img width="130" alt="" src="https://github.com/user-attachments/assets/f92ca630-e5ba-4428-99c3-97b9062e4f07">|<img width="130" alt="" src="https://github.com/user-attachments/assets/90e77985-a7ef-4b61-b575-b0f0c23af0a7">|
 
 
 ## :framed_picture: Demo
