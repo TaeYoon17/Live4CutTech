@@ -19,51 +19,97 @@ protocol FrameServiceProtocol{
     var frameTargetSize: CGSize { get }
     var frameCornerRadius: CGFloat { get }
     
-    func reduce(images:[CGImage],spacing:CGFloat) throws -> CGImage
+//    func reduce(images:[CGImage],spacing:CGFloat) throws -> CGImage
+    func reduce(images:inout [CGImage],spacing:CGFloat) throws -> CGImage
 }
 final class FrameGenerator:FrameServiceProtocol{
     var frameType:FrameType = .basic2x2
     var frameTargetSize: CGSize = .init(width: 300, height: 300 * 1.77)
     var frameCornerRadius: CGFloat = 0
+    
+    func groupReduce(groupImageURL groupImage: [[URL]],spacing: CGFloat) async throws -> [CGImage]{
+        let frameCount = groupImage.first!.count
+        let groupCount = groupImage.count
+        var images:[CGImage] = []
+        for offset in 0..<frameCount {
+            var singleFrameImagesURL = (0..<groupCount).map{ groupImage[$0][offset] }
+            var singleFrameImages = singleFrameImagesURL.map {
+                self.loadCGImageFromFile(at: $0)!
+            }
+            let reduceImage = try! self.reduce(images: &singleFrameImages, spacing: 4)
+            singleFrameImages = []
+            try await Task.sleep(nanoseconds: 100)
+            images.append(reduceImage)
+        }
+        return images
+        
+    }
+    func loadCGImageFromFile(at url: URL) -> CGImage? {
+        // 파일에서 이미지 데이터를 읽어오기 위한 CGImageSource 생성
+        guard let imageSource = CGImageSourceCreateWithURL(url as CFURL, nil) else {
+            print("Failed to create image source.")
+            return nil
+        }
+
+        // 첫 번째 이미지에서 CGImage 가져오기 (여러 페이지가 있을 경우 첫 번째 페이지)
+        guard let cgImage = CGImageSourceCreateImageAtIndex(imageSource, 0, nil) else {
+            print("Failed to create CGImage.")
+            return nil
+        }
+        
+        return cgImage
+    }
     func groupReduce(groupImage: [[CGImage]],spacing: CGFloat) async throws -> [CGImage]{
         let frameCount = groupImage.first!.count
         let groupCount = groupImage.count
-        let images:[CGImage] = try await withThrowingTaskGroup(of: (Int,CGImage).self) { taskGroup in
-            for offset in 0..<frameCount {
-                let singleFrameImages = (0..<groupCount).map{ groupImage[$0][offset] }
-                taskGroup.addTask {
-                    let reduceImage = try! self.reduce(images: singleFrameImages, spacing: 4)
-                    return (offset,reduceImage)
-                }
-            }
-            var imgs:[CGImage?] = Array(repeating: nil,count: frameCount)
-            for try await v in taskGroup{
-                imgs[v.0] = v.1
-            }
-            return imgs.compactMap({$0})
+        var images:[CGImage] = []
+        for offset in 0..<frameCount {
+            var singleFrameImages = (0..<groupCount).map{ groupImage[$0][offset] }
+            let reduceImage = try! self.reduce(images: &singleFrameImages, spacing: 4)
+            singleFrameImages = []
+            try await Task.sleep(nanoseconds: 100)
+            images.append(reduceImage)
         }
+//        let images:[CGImage] = try await withThrowingTaskGroup(of: (Int,CGImage).self) { taskGroup in
+//            for offset in 0..<frameCount {
+//                var singleFrameImages = (0..<groupCount).map{ groupImage[$0][offset] }
+//                taskGroup.addTask {
+//                    let reduceImage = try! self.reduce(images: singleFrameImages, spacing: 4)
+//                    singleFrameImages = []
+//                    return (offset,reduceImage)
+//                }
+//            }
+//            var imgs:[CGImage?] = Array(repeating: nil,count: frameCount)
+//            for try await v in taskGroup{
+//                imgs[v.0] = v.1
+//            }
+//            return imgs.compactMap({$0})
+//        }
         return images
         
     }
 }
 extension FrameGenerator{
-    func reduce(images:[CGImage],spacing:CGFloat) throws -> CGImage{
+    func reduce(images:inout [CGImage],spacing:CGFloat) throws -> CGImage{
         let frameTargetSize = frameTargetSize
-        let frameCornerRadius = frameCornerRadius
-        let flipCropImages = images.map{
+        let flipCropImages:[CGImage] = images.map{
             let flippedImg = try! $0.flipImageHorizontal()!
             let (height,width) = (CGFloat(flippedImg.height),CGFloat(flippedImg.width))
             let centerCropSize = CGRect.cropFromCenter(width: width, height: height,ratio: frameTargetSize.ratio)
             return flippedImg.cropping(to: centerCropSize)!
-//                .makeRoundedCorner(radius: frameCornerRadius  * centerCropSize.width / frameTargetSize.width)!
         }
+        images = []
         let nW = 0.5 * frameTargetSize.width - 1.5 * spacing
         let nH = 0.5 * frameTargetSize.height - 1.5 * spacing
         let ltRect = CGRect.init(x: spacing, y: spacing, width: nW, height: nH)
         let rtRect = CGRect.init(x: nW + 2 * spacing, y: spacing, width: nW, height: nH)
         let ldRect = CGRect.init(x: spacing, y: nH + 2 * spacing, width: nW, height: nH)
         let rdRect = CGRect.init(x: nW + 2 * spacing, y: nH + 2 * spacing, width: nW, height: nH)
-        let render = UIGraphicsImageRenderer(size: frameTargetSize)
+        let rendererFormat = UIGraphicsImageRendererFormat()
+        rendererFormat.scale = 1
+        rendererFormat.opaque = true
+        rendererFormat.preferredRange = .standard
+        let render = UIGraphicsImageRenderer(size: frameTargetSize,format: rendererFormat)
         let imageData = render.image { context in
             context.cgContext.setFillColor(UIColor.black.cgColor)
             context.cgContext.beginPath()

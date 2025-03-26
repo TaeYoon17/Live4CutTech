@@ -38,13 +38,15 @@
 		638F14DD2C23DAD900CD3F2E /* ThumbnailFourFrameView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 638F14DC2C23DAD900CD3F2E /* ThumbnailFourFrameView.swift */; };
 		638F14E12C23DC1C00CD3F2E /* SelectDoneButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 638F14E02C23DC1C00CD3F2E /* SelectDoneButton.swift */; };
 		638F14E52C23DCE800CD3F2E /* ReselectButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 638F14E42C23DCE800CD3F2E /* ReselectButton.swift */; };
-		63B68F7B2C35932A0047D610 /* FrameService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63B68F7A2C35932A0047D610 /* FrameService.swift */; };
 		63B869F32C22690800577592 /* Test>ThumbnailSelectorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63B869F22C22690800577592 /* Test>ThumbnailSelectorView.swift */; };
 		63C9F9102C3598DB00451694 /* ThumbnailSelectorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63C9F90F2C3598DB00451694 /* ThumbnailSelectorView.swift */; };
+		63CC957F2D943B2B00E6138D /* PHAssetExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63CC957E2D943B2B00E6138D /* PHAssetExtensions.swift */; };
+		63CC95802D943B2B00E6138D /* FrameService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63CC957C2D943B2B00E6138D /* FrameService.swift */; };
+		63CC95812D943B2B00E6138D /* ExtractService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63CC957B2D943B2B00E6138D /* ExtractService.swift */; };
+		63CC95822D943B2B00E6138D /* LPtoAVService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63CC957D2D943B2B00E6138D /* LPtoAVService.swift */; };
 		63DB9D442C21D8740047DED0 /* Test>PhotoSelectorVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63DB9D432C21D8740047DED0 /* Test>PhotoSelectorVC.swift */; };
 		63DB9D482C21D8E50047DED0 /* Test>ThumbnailFourFrameView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63DB9D472C21D8E50047DED0 /* Test>ThumbnailFourFrameView.swift */; };
 		63DB9D4C2C21ECCB0047DED0 /* Test>FrameSelectorVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63DB9D4B2C21ECCB0047DED0 /* Test>FrameSelectorVC.swift */; };
-		63DB9D502C21ED9A0047DED0 /* PHAssetExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63DB9D4F2C21ED9A0047DED0 /* PHAssetExtensions.swift */; };
 		63E30B0B2C38283300374372 /* ThumbnailExecutor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63E30AFF2C38283300374372 /* ThumbnailExecutor.swift */; };
 		63E30B0C2C38283300374372 /* VideoExecutor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63E30B002C38283300374372 /* VideoExecutor.swift */; };
 		63E30B0D2C38283300374372 /* DoneBtn.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63E30B022C38283300374372 /* DoneBtn.swift */; };
@@ -54,10 +56,8 @@
 		63E30B112C38283300374372 /* FrameView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63E30B072C38283300374372 /* FrameView.swift */; };
 		63E30B122C38283300374372 /* LoadingVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63E30B082C38283300374372 /* LoadingVC.swift */; };
 		63E30B132C38283300374372 /* VideoCreator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63E30B092C38283300374372 /* VideoCreator.swift */; };
-		63FC26212C357B74007C6703 /* ExtractService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63FC26202C357B74007C6703 /* ExtractService.swift */; };
 		63FC703B2C201C2300F9B3A0 /* TestViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63FC703A2C201C2300F9B3A0 /* TestViewController.swift */; };
 		63FC70412C201DD200F9B3A0 /* TestVideoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63FC70402C201DD200F9B3A0 /* TestVideoView.swift */; };
-		63FC70432C201F1E00F9B3A0 /* LPtoAVService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63FC70422C201F1E00F9B3A0 /* LPtoAVService.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -125,13 +125,15 @@
 		638F14DC2C23DAD900CD3F2E /* ThumbnailFourFrameView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThumbnailFourFrameView.swift; sourceTree = "<group>"; };
 		638F14E02C23DC1C00CD3F2E /* SelectDoneButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectDoneButton.swift; sourceTree = "<group>"; };
 		638F14E42C23DCE800CD3F2E /* ReselectButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReselectButton.swift; sourceTree = "<group>"; };
-		63B68F7A2C35932A0047D610 /* FrameService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FrameService.swift; sourceTree = "<group>"; };
 		63B869F22C22690800577592 /* Test>ThumbnailSelectorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Test>ThumbnailSelectorView.swift"; sourceTree = "<group>"; };
 		63C9F90F2C3598DB00451694 /* ThumbnailSelectorView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ThumbnailSelectorView.swift; sourceTree = "<group>"; };
+		63CC957B2D943B2B00E6138D /* ExtractService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExtractService.swift; sourceTree = "<group>"; };
+		63CC957C2D943B2B00E6138D /* FrameService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FrameService.swift; sourceTree = "<group>"; };
+		63CC957D2D943B2B00E6138D /* LPtoAVService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LPtoAVService.swift; sourceTree = "<group>"; };
+		63CC957E2D943B2B00E6138D /* PHAssetExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PHAssetExtensions.swift; sourceTree = "<group>"; };
 		63DB9D432C21D8740047DED0 /* Test>PhotoSelectorVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Test>PhotoSelectorVC.swift"; sourceTree = "<group>"; };
 		63DB9D472C21D8E50047DED0 /* Test>ThumbnailFourFrameView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Test>ThumbnailFourFrameView.swift"; sourceTree = "<group>"; };
 		63DB9D4B2C21ECCB0047DED0 /* Test>FrameSelectorVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Test>FrameSelectorVC.swift"; sourceTree = "<group>"; };
-		63DB9D4F2C21ED9A0047DED0 /* PHAssetExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PHAssetExtensions.swift; sourceTree = "<group>"; };
 		63E30AFF2C38283300374372 /* ThumbnailExecutor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ThumbnailExecutor.swift; sourceTree = "<group>"; };
 		63E30B002C38283300374372 /* VideoExecutor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VideoExecutor.swift; sourceTree = "<group>"; };
 		63E30B022C38283300374372 /* DoneBtn.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DoneBtn.swift; sourceTree = "<group>"; };
@@ -141,10 +143,8 @@
 		63E30B072C38283300374372 /* FrameView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FrameView.swift; sourceTree = "<group>"; };
 		63E30B082C38283300374372 /* LoadingVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoadingVC.swift; sourceTree = "<group>"; };
 		63E30B092C38283300374372 /* VideoCreator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VideoCreator.swift; sourceTree = "<group>"; };
-		63FC26202C357B74007C6703 /* ExtractService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExtractService.swift; sourceTree = "<group>"; };
 		63FC703A2C201C2300F9B3A0 /* TestViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestViewController.swift; sourceTree = "<group>"; };
 		63FC70402C201DD200F9B3A0 /* TestVideoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestVideoView.swift; sourceTree = "<group>"; };
-		63FC70422C201F1E00F9B3A0 /* LPtoAVService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LPtoAVService.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -425,10 +425,10 @@
 		63FC703F2C201D8600F9B3A0 /* Services */ = {
 			isa = PBXGroup;
 			children = (
-				63FC70422C201F1E00F9B3A0 /* LPtoAVService.swift */,
-				63DB9D4F2C21ED9A0047DED0 /* PHAssetExtensions.swift */,
-				63FC26202C357B74007C6703 /* ExtractService.swift */,
-				63B68F7A2C35932A0047D610 /* FrameService.swift */,
+				63CC957B2D943B2B00E6138D /* ExtractService.swift */,
+				63CC957C2D943B2B00E6138D /* FrameService.swift */,
+				63CC957D2D943B2B00E6138D /* LPtoAVService.swift */,
+				63CC957E2D943B2B00E6138D /* PHAssetExtensions.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -569,7 +569,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				63DB9D502C21ED9A0047DED0 /* PHAssetExtensions.swift in Sources */,
 				08DBE6652C1C23B1000593D5 /* FrameSelectionViewController.swift in Sources */,
 				636510C42C2D229F00B2A2E9 /* VideoFrameDividerScene.swift in Sources */,
 				63E30B0D2C38283300374372 /* DoneBtn.swift in Sources */,
@@ -584,7 +583,6 @@
 				63E30B132C38283300374372 /* VideoCreator.swift in Sources */,
 				084EC5C62C24AC9900BA9FC3 /* UIView.swift in Sources */,
 				084EC5C22C249E4300BA9FC3 /* ExtractionViewController.swift in Sources */,
-				63FC26212C357B74007C6703 /* ExtractService.swift in Sources */,
 				63077A072C245C6900C4017A /* PreFourFrameView.swift in Sources */,
 				630779FC2C24530A00C4017A /* UINavigationController+.swift in Sources */,
 				633EB11D2C22BDE7006F89E7 /* Test>SelectDoneBtn.swift in Sources */,
@@ -594,7 +592,10 @@
 				63DB9D4C2C21ECCB0047DED0 /* Test>FrameSelectorVC.swift in Sources */,
 				63E30B102C38283300374372 /* CardView.swift in Sources */,
 				63FC703B2C201C2300F9B3A0 /* TestViewController.swift in Sources */,
-				63FC70432C201F1E00F9B3A0 /* LPtoAVService.swift in Sources */,
+				63CC957F2D943B2B00E6138D /* PHAssetExtensions.swift in Sources */,
+				63CC95802D943B2B00E6138D /* FrameService.swift in Sources */,
+				63CC95812D943B2B00E6138D /* ExtractService.swift in Sources */,
+				63CC95822D943B2B00E6138D /* LPtoAVService.swift in Sources */,
 				638F14E12C23DC1C00CD3F2E /* SelectDoneButton.swift in Sources */,
 				63077A0E2C247D2200C4017A /* PreCardView.swift in Sources */,
 				63E30B0B2C38283300374372 /* ThumbnailExecutor.swift in Sources */,
@@ -610,7 +611,6 @@
 				63E30B122C38283300374372 /* LoadingVC.swift in Sources */,
 				63E30B0F2C38283300374372 /* BaseVC.swift in Sources */,
 				638F14D92C23DA7900CD3F2E /* PhotoSelectionViewController.swift in Sources */,
-				63B68F7B2C35932A0047D610 /* FrameService.swift in Sources */,
 				633EB1222C22C3DD006F89E7 /* Test>FrameCardView.swift in Sources */,
 				63E30B112C38283300374372 /* FrameView.swift in Sources */,
 				633EB1202C22C087006F89E7 /* PreviewVC.swift in Sources */,
