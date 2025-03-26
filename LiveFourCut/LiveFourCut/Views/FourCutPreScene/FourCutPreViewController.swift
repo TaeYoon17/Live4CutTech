@@ -104,7 +104,10 @@ final class FourCutPreViewController: BaseVC{
                 self.extractService.minDuration = Double(self.minDuration)
                 print("minDuration \(self.minDuration)")
                 do{
+                    let startTime = CFAbsoluteTimeGetCurrent()
                     var frameImages = try await self.extractService.extractFrameImages()
+                    let endTime = CFAbsoluteTimeGetCurrent()
+                    print("Extract Time: \((endTime - startTime) * 1000 )")
                     var imgDatas:[CGImage] = try await self.frameService.groupReduce(groupImageURL: frameImages, spacing: 4)
                     print("추출은 된다. \(frameImages.first?.count)")
                     print("감소는 된다. \(imgDatas.count)")
