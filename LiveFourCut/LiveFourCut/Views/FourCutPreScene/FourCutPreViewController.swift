@@ -8,7 +8,6 @@
 import UIKit
 import Combine
 import CoreMedia
-
 final class FourCutPreViewController: BaseVC{
     // MARK: -- Service 연결
     let extractService = ExtractService()
@@ -104,7 +103,10 @@ final class FourCutPreViewController: BaseVC{
                 self.extractService.minDuration = Double(self.minDuration)
                 print("minDuration \(self.minDuration)")
                 do{
+                    let prevTime = CFAbsoluteTimeGetCurrent()
                     var frameImages = try await self.extractService.extractFrameImages()
+                    let nowTime = CFAbsoluteTimeGetCurrent()
+                    print("Extract time: ",(nowTime - prevTime) * 1000)
                     var imgDatas:[CGImage] = try await self.frameService.groupReduce(groupImage: frameImages, spacing: 4)
                     print("추출은 된다. \(frameImages.first?.count)")
                     print("감소는 된다. \(imgDatas.count)")
