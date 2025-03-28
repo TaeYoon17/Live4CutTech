@@ -7,6 +7,8 @@
 
 import UIKit
 import SnapKit
+import Photos
+import PhotosUI
 
 class FrameSelectionViewController: UIViewController {
     
@@ -15,10 +17,8 @@ class FrameSelectionViewController: UIViewController {
     /// 프레임 선택 title
     let frameLabel: UILabel = {
         var label = UILabel()
-        
         label.text = "이미지 선택"
         label.font = .systemFont(ofSize: 30, weight: .bold)
-        
         return label
     }()
     let descLabel: UILabel = {
@@ -66,6 +66,7 @@ class FrameSelectionViewController: UIViewController {
         return label
     }()
     
+    private var nowPhotoAccessStatus: PHAuthorizationStatus!
     
     // MARK: - Life Cycle
     
@@ -84,11 +85,12 @@ class FrameSelectionViewController: UIViewController {
         outerFrameView.addGestureRecognizer(fourFrameTapGesture)
         self.setupUI()
         self.setupConstraints()
-
+        self.setupPhotoKit()
     }
     
     override func viewWillAppear(_ animated: Bool) {
         self.navigationController?.setNavigationBarHidden(true, animated: false)
+        self.nowPhotoAccessStatus = PHPhotoLibrary.authorizationStatus(for: .readWrite)
     }
     
     // MARK: - Setup
@@ -96,6 +98,17 @@ class FrameSelectionViewController: UIViewController {
     private func setupUI(){
         [frameLabel, descLabel, outerFrameView].forEach { self.view.addSubview($0) }
         outerFrameView.addSubview(infoStackView)
+    }
+    
+    func setupPhotoKit() {
+        self.nowPhotoAccessStatus = PHPhotoLibrary.authorizationStatus(for: .readWrite)
+        switch self.nowPhotoAccessStatus {
+        case .notDetermined:
+            PHPhotoLibrary.requestAuthorization(for: .readWrite) { [weak self] status in
+                self?.nowPhotoAccessStatus = status
+            }
+        default: break
+        }
     }
     
     private func setupConstraints() {
@@ -122,32 +135,42 @@ class FrameSelectionViewController: UIViewController {
     /// 프레임에 추가할 새로운 Frame 생성하는 함수
     
     
-    /// 버튼 클릭 시 줄어드는 동작 함수
-    /// Button으로 덮지 않고 animation 효과를 반영
-    private func animateView(_ view: UIView, completion: @escaping () -> Void) {
-        UIView.animate(withDuration: 0.1, animations: {
-            view.transform = CGAffineTransform(scaleX: 0.8, y: 0.8)
-        }, completion: { _ in
-            UIView.animate(withDuration: 0.1) {
-                view.transform = CGAffineTransform.identity
-            } completion: { _ in
-                completion()
-            }
-        })
-    }
-    
     /// 프레임이 선택되었을 시 동작 함수
     @objc private func frameStackViewTapped(_ sender: UITapGestureRecognizer) {
+        guard let nowPhotoAccessStatus = self.nowPhotoAccessStatus else {return}
+        switch nowPhotoAccessStatus {
+        case .authorized: self.goToSelectPhotos(sender)
+        case .denied:
+            let alertController = UIAlertController(title: "앨범 접근을 허용해주세요!", message: "[사진 > 전체 접근]을 허용해주세요", preferredStyle: .alert)
+            alertController.addAction(.init(title: "확인", style: .default,handler: { [weak self] action in
+                guard let self else { return }
+                if let appSettings = URL(string: UIApplication.openSettingsURLString) {
+                    UIApplication.shared.open(appSettings)
+                }
+            }))
+            alertController.addAction(.init(title: "취소", style: .cancel))
+            self.present(alertController, animated: true)
+        case .limited: self.goToSelectPhotos(sender)
+        case .restricted, .notDetermined:
+            let alertController = UIAlertController(title: "현재 사용할 수 없습니다", message: "앨범 접근을 할 수 없어요\n 빠르게 수정해드리겠습니다!!", preferredStyle: .alert)
+            alertController.addAction(.init(title: "확인", style: .cancel))
+            self.present(alertController, animated: true)
+        @unknown default: break
+        }
+        
+    }
+    
+    func goToSelectPhotos(_ sender: UITapGestureRecognizer) {
         var frameCount = 0
         frameCount = 4
-        animateView(sender.view!) {
-            print("4 Frame Stack View Tapped")
+        sender.view?.animateView {[weak self] in
             let photoSelectionViewController = PhotoSelectionViewController()
             photoSelectionViewController.frameCount = frameCount
-            self.navigationController?.pushViewController(
+            self?.navigationController?.pushViewController(
                 photoSelectionViewController,
                 animated: true)
         }
     }
 }
+
 
