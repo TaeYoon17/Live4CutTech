@@ -198,7 +198,6 @@ class ExtractionViewController: UIViewController {
                 }
             }
             await MainActor.run {
-                print("계수",images.count)
                 for i in 0..<Int(self.minDuration! * 24) {
                     [imageView1,imageView2,imageView3,imageView4].enumerated().forEach { idx,view in
                         if let img = images[idx][i]{ view.image = img }

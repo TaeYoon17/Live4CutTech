@@ -7,52 +7,57 @@
 
 import Foundation
 import UIKit
-enum FrameError: Error{
+enum FrameError: Error {
     case flipFailed
     case renderFailed
 }
-enum FrameType{
+enum FrameType {
     case basic2x2
 }
-protocol FrameServiceProtocol{
+protocol FrameServiceProtocol {
     var frameType:FrameType { get }
     var frameTargetSize: CGSize { get }
     var frameCornerRadius: CGFloat { get }
     
     func reduce(images:[CGImage],spacing:CGFloat) throws -> CGImage
 }
-final class FrameGenerator:FrameServiceProtocol{
+
+final class FrameGenerator: FrameServiceProtocol {
     var frameType:FrameType = .basic2x2
-    var frameTargetSize: CGSize = .init(width: 300, height: 300 * 1.77)
+    var frameTargetSize: CGSize = .init(width: 480, height: 480 * 1.77)
     var frameCornerRadius: CGFloat = 0
-    func groupReduce(groupImage: [[CGImage]],spacing: CGFloat) async throws -> [CGImage]{
+    
+    func groupReduce(
+        groupImage: [[CGImage]],
+        spacing: CGFloat
+    ) async throws -> [CGImage] {
         let frameCount = groupImage.first!.count
         let groupCount = groupImage.count
-        let images:[CGImage] = try await withThrowingTaskGroup(of: (Int,CGImage).self) { taskGroup in
+        let images:[CGImage] = try await withThrowingTaskGroup(of: (Int,CGImage?).self) { taskGroup in
             for offset in 0..<frameCount {
                 let singleFrameImages = (0..<groupCount).map{ groupImage[$0][offset] }
                 taskGroup.addTask {
-                    let reduceImage = try! self.reduce(images: singleFrameImages, spacing: 4)
-                    return (offset,reduceImage)
+                        let reduceImage = try? self.reduce(images: singleFrameImages, spacing: 4)
+                        return (offset,reduceImage)
                 }
             }
             var imgs:[CGImage?] = Array(repeating: nil,count: frameCount)
             for try await v in taskGroup{
                 imgs[v.0] = v.1
             }
-            return imgs.compactMap({$0})
+            return imgs.compactMap({ $0 })
         }
         return images
         
     }
 }
 extension FrameGenerator{
-    func reduce(images:[CGImage],spacing:CGFloat) throws -> CGImage{
+    func reduce(images:[CGImage],spacing:CGFloat) throws -> CGImage {
         let frameTargetSize = frameTargetSize
         let frameCornerRadius = frameCornerRadius
-        let flipCropImages = images.map{
+        let flipCropImages = images.map {
             let flippedImg = try! $0.flipImageHorizontal()!
-            let (height,width) = (CGFloat(flippedImg.height),CGFloat(flippedImg.width))
+            let (height,width) = (CGFloat(flippedImg.height), CGFloat(flippedImg.width))
             let centerCropSize = CGRect.cropFromCenter(width: width, height: height,ratio: frameTargetSize.ratio)
             return flippedImg.cropping(to: centerCropSize)!
 //                .makeRoundedCorner(radius: frameCornerRadius  * centerCropSize.width / frameTargetSize.width)!
@@ -63,12 +68,17 @@ extension FrameGenerator{
         let rtRect = CGRect.init(x: nW + 2 * spacing, y: spacing, width: nW, height: nH)
         let ldRect = CGRect.init(x: spacing, y: nH + 2 * spacing, width: nW, height: nH)
         let rdRect = CGRect.init(x: nW + 2 * spacing, y: nH + 2 * spacing, width: nW, height: nH)
+        
         let render = UIGraphicsImageRenderer(size: frameTargetSize)
+        
         let imageData = render.image { context in
             context.cgContext.setFillColor(UIColor.black.cgColor)
             context.cgContext.beginPath()
-            let roundedPath2 = CGPath.init(roundedRect: .init(origin: .zero, size: frameTargetSize),
-                                           cornerWidth: frameCornerRadius, cornerHeight: frameCornerRadius, transform: nil)
+            let roundedPath2 = CGPath.init(
+                roundedRect: .init(origin: .zero, size: frameTargetSize),
+                cornerWidth: frameCornerRadius, cornerHeight: frameCornerRadius,
+                transform: nil
+            )
             context.cgContext.addPath(roundedPath2)
             context.cgContext.closePath()
             context.cgContext.fillPath()

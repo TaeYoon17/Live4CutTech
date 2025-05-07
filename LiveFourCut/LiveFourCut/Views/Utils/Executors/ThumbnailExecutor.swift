@@ -23,15 +23,17 @@ actor ThumbnailExecutor{ // Actor는 상속이 가능하다
         }
     }
     private var fetchItems:[ImageContainer] = []
+    
     private var fetchAssets:[PHAsset] = []{
         didSet{
             guard counter == fetchAssets.count else { return }
             Task {
                 let resultCount = self.fetchAssets.count
                 for asset in fetchAssets {
-                    fetchImage(phAsset: asset,
-                               size: .init(width: 3 * 120, height: 3 * 120 * 1.77),
-                               contentMode: .aspectFill) { image in
+                    fetchImage(
+                        phAsset: asset,
+                        size: .init(width: 3 * 120, height: 3 * 120 * 1.77),
+                        contentMode: .aspectFill) { image in
                         let count = self.fetchItems.count
                         self.fetchItems.append(ImageContainer(id: asset.localIdentifier, image: image, idx: count))
                         self.counter -= 1
@@ -56,7 +58,7 @@ actor ThumbnailExecutor{ // Actor는 상속이 가능하다
 //            Task{
 //                do{
 //                
-////                    let image = try await asset.convertToUIImage(size: .init(width: 120, height: 120 * 1.3333))
+//                    let image = try await asset.convertToUIImage(size: .init(width: 120, height: 120 * 1.3333))
 ////                    let count = self.fetchItems.count
 ////                    self.fetchItems.append(ImageContainer(id: asset.localIdentifier, image: image, idx: count))
 ////                    self.counter -= 1
@@ -76,8 +78,11 @@ actor ThumbnailExecutor{ // Actor는 상속이 가능하다
         let options = PHImageRequestOptions()
         options.isNetworkAccessAllowed = true // iCloud
         options.deliveryMode = .highQualityFormat
-        
-        imageManager.requestImage(for: phAsset,targetSize: size,contentMode: contentMode, options: options,
+        imageManager.requestImage(
+            for: phAsset,
+            targetSize: size,
+            contentMode: contentMode,
+            options: options,
             resultHandler: { image, _ in
                 guard let image else { return }
                 completion(image)

@@ -105,7 +105,7 @@ final class PhotoSelectionViewController: LoadingVC{
         }
         thumbnailSelectorView.vm = vm
         thumbnailFrameView.vm = vm
-        self.reSelectPhotoBtn.action = {[weak self] in
+        self.reSelectPhotoBtn.action = { [weak self] in
             self?.openPickerVC()
         }
     }

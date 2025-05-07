@@ -13,22 +13,33 @@ class VideoCreator {
     let fps:Int32 = 24
     var videoSize: CGSize
     var outputURL:URL
+    
     init(videoSize: CGSize,outputURL: URL) {
         self.videoSize = videoSize
         self.outputURL = outputURL
     }
-    static func createVideo(from images: [UIImage], outputURL: URL, fps: Int32 = 24, completion: @escaping (Bool, Error?) -> Void) {
+    
+    static func createVideo(
+        from images: [UIImage],
+        outputURL: URL,
+        fps: Int32 = 24,
+        completion: @escaping (Bool, Error?) -> Void
+    ) {
         print(images.count)
         guard !images.isEmpty else {
-            completion(false, NSError(domain: "com.example.VideoCreator", code: -1, userInfo: [NSLocalizedDescriptionKey: "No images to create video"]))
+            completion(
+                false,
+                NSError(
+                    domain: "com.example.VideoCreator",
+                    code: -1,
+                    userInfo: [NSLocalizedDescriptionKey: "No images to create video"]
+                )
+            )
             return
         }
         
         // 비디오 설정
-        let maxNumber = images.reduce(0) { partialResult, image in
-            max(partialResult,image.cgImage!.width * 3,image.cgImage!.height * 3)
-        }
-        let videoSize = CGSize(width: images.last!.cgImage!.width * 3, height: images.last!.cgImage!.height * 3)
+        let videoSize = CGSize(width: images.last!.cgImage!.width, height: images.last!.cgImage!.height)
         let writer = try! AVAssetWriter(outputURL: outputURL, fileType: .mp4)
         
         let settings: [String: Any] = [
@@ -60,12 +71,15 @@ class VideoCreator {
                 while !writerInput.isReadyForMoreMediaData { }
                 
                 guard let pixelBuffer = self.pixelBuffer(from: image, size: videoSize) else {
-                    completion(false, NSError(domain: "com.example.VideoCreator", code: -1, userInfo: [NSLocalizedDescriptionKey: "Failed to create pixel buffer"]))
+                    completion(false, NSError(
+                        domain: "com.example.VideoCreator",
+                        code: -1,
+                        userInfo: [NSLocalizedDescriptionKey: "Failed to create pixel buffer"]
+                    ))
                     return
                 }
                 
                 let frameTime = CMTimeMake(value: frameCount, timescale: fps)
-//                print("frame time \(frameTime)")
                 adaptor.append(pixelBuffer, withPresentationTime: frameTime)
                 frameCount += 1
             }
@@ -91,40 +105,54 @@ class VideoCreator {
         }
         
         CVPixelBufferLockBaseAddress(buffer, [])
-        let context = CGContext(data: CVPixelBufferGetBaseAddress(buffer),
-                                width: Int(size.width),
-                                height: Int(size.height),
-                                bitsPerComponent: 8,
-                                bytesPerRow: CVPixelBufferGetBytesPerRow(buffer),
-                                space: CGColorSpaceCreateDeviceRGB(),
-                                bitmapInfo: CGImageAlphaInfo.noneSkipFirst.rawValue)
+        let context = CGContext(
+            data: CVPixelBufferGetBaseAddress(buffer),
+            width: Int(size.width),
+            height: Int(size.height),
+            bitsPerComponent: 8,
+            bytesPerRow: CVPixelBufferGetBytesPerRow(buffer),
+            space: CGColorSpaceCreateDeviceRGB(),
+            bitmapInfo: CGImageAlphaInfo.noneSkipFirst.rawValue
+        )
         
-        context?.draw(image.cgImage!, in: CGRect(origin: .zero, size: size))
+        context?.draw(
+            image.cgImage!,
+            in: CGRect(origin: .zero, size: size)
+        )
         CVPixelBufferUnlockBaseAddress(buffer, [])
         
         return buffer
     }
-    private static func pixelBuffer(_ image:CGImage, size: CGSize) -> CVPixelBuffer?{
+    private static func pixelBuffer(_ image: CGImage, size: CGSize) -> CVPixelBuffer? {
         let options: [CFString: Any] = [
             kCVPixelBufferCGImageCompatibilityKey: kCFBooleanTrue as Any,
             kCVPixelBufferCGBitmapContextCompatibilityKey: kCFBooleanTrue as Any
         ]
         
         var pixelBuffer: CVPixelBuffer?
-        let status = CVPixelBufferCreate(kCFAllocatorDefault, Int(size.width), Int(size.height), kCVPixelFormatType_32ARGB, options as CFDictionary, &pixelBuffer)
+        let status = CVPixelBufferCreate(
+            kCFAllocatorDefault,
+            Int(size.width),
+            Int(size.height),
+            kCVPixelFormatType_32ARGB,
+            options as CFDictionary,
+            &pixelBuffer
+        )
         
         guard status == kCVReturnSuccess, let buffer = pixelBuffer else {
             return nil
         }
         
         CVPixelBufferLockBaseAddress(buffer, [])
-        let context = CGContext(data: CVPixelBufferGetBaseAddress(buffer),
-                                width: Int(size.width),
-                                height: Int(size.height),
-                                bitsPerComponent: 8,
-                                bytesPerRow: CVPixelBufferGetBytesPerRow(buffer),
-                                space: CGColorSpaceCreateDeviceRGB(),
-                                bitmapInfo: CGImageAlphaInfo.noneSkipFirst.rawValue)
+        let context = CGContext(
+            data: CVPixelBufferGetBaseAddress(buffer),
+            width: Int(size.width),
+            height: Int(size.height),
+            bitsPerComponent: 8,
+            bytesPerRow: CVPixelBufferGetBytesPerRow(buffer),
+            space: CGColorSpaceCreateDeviceRGB(),
+            bitmapInfo: CGImageAlphaInfo.noneSkipFirst.rawValue
+        )
         
         context?.draw(image, in: CGRect(origin: .zero, size: size))
         CVPixelBufferUnlockBaseAddress(buffer, [])
@@ -146,39 +174,67 @@ class VideoCreator {
     }
 }
 extension VideoCreator{
-    func createVideo(from images: inout [CGImage], completion: @escaping (Bool, Error?) -> Void) {
+    func createVideo(
+        from images: inout [CGImage],
+        completion: @escaping (Bool, Error?) -> Void
+    ) {
+        
         let writer = try! AVAssetWriter(outputURL: outputURL, fileType: .mov)
-        let videoSize = CGSize(width: self.videoSize.width * 3, height: self.videoSize.height * 3)
+        
+        let videoSize = CGSize(width: images.last!.width, height: images.last!.height)
+        self.videoSize = videoSize
+//        let videoSize = CGSize(width: self.videoSize.width, height: self.videoSize.height)
+        
+        print("[VideoSize] \(videoSize)")
+        
         let settings: [String: Any] = [
             AVVideoCodecKey: AVVideoCodecType.h264,
             AVVideoWidthKey: videoSize.width,
             AVVideoHeightKey: videoSize.height
         ]
+        
         let writerInput = AVAssetWriterInput(mediaType: .video, outputSettings: settings)
         writerInput.expectsMediaDataInRealTime = false
         writer.add(writerInput)
+        
         let sourcePixelBufferAttributes: [String: Any] = [
             kCVPixelBufferPixelFormatTypeKey as String: Int(kCVPixelFormatType_32ARGB),
             kCVPixelBufferWidthKey as String: videoSize.width,
-            kCVPixelBufferHeightKey as String: videoSize.height
+            kCVPixelBufferHeightKey as String: videoSize.height,
         ]
-        let adaptor = AVAssetWriterInputPixelBufferAdaptor(assetWriterInput: writerInput, sourcePixelBufferAttributes: sourcePixelBufferAttributes)
+        
+        let adaptor = AVAssetWriterInputPixelBufferAdaptor(
+            assetWriterInput: writerInput,
+            sourcePixelBufferAttributes: sourcePixelBufferAttributes
+        )
         
         writer.startWriting()
         writer.startSession(atSourceTime: .zero)
         
+        
         var frameCount: Int64 = 0
-        let frameDuration = CMTimeMake(value: 1, timescale: fps)
         for image in images {
             autoreleasepool {
                 while !writerInput.isReadyForMoreMediaData { }
-                guard let pixelBuffer = image.getCVPixelBuffer else {
-                    completion(false, NSError(domain: "com.example.VideoCreator", code: -1, userInfo: [NSLocalizedDescriptionKey: "Failed to create pixel buffer"]))
+                var pixelBuffer: CVPixelBuffer?
+                image.getCVPixelBuffer(pixelBuffer: &pixelBuffer)
+                guard let pixelBuffer else {
+                    completion(
+                        false,
+                        NSError(
+                            domain: "com.example.VideoCreator",
+                            code: -1,
+                            userInfo: [NSLocalizedDescriptionKey: "Failed to create pixel buffer"]
+                        )
+                    )
                     return
                 }
                 let frameTime = CMTimeMake(value: frameCount, timescale: fps)
-                print(frameTime)
-                adaptor.append(pixelBuffer, withPresentationTime: frameTime)
+                pixelBuffer.autoRelease { [weak pixelBuffer] in
+                    guard var pixelBuffer else { return }
+                    image.drawCVPixelBuffer(&pixelBuffer)
+                    adaptor.append(pixelBuffer, withPresentationTime: frameTime)
+                }
                 frameCount += 1
             }
         }
@@ -189,30 +245,42 @@ extension VideoCreator{
     }
 }
 extension CGImage{
-    var getCVPixelBuffer:CVPixelBuffer?{
+    func getCVPixelBuffer(pixelBuffer: inout CVPixelBuffer?) {
         let options: [CFString: Any] = [
             kCVPixelBufferCGImageCompatibilityKey: kCFBooleanTrue as Any,
             kCVPixelBufferCGBitmapContextCompatibilityKey: kCFBooleanTrue as Any
         ]
+        let status = CVPixelBufferCreate(
+            kCFAllocatorDefault,
+            self.width,
+            self.height,
+            kCVPixelFormatType_32ARGB,
+            options as CFDictionary,
+            &pixelBuffer
+        )
         
-        var pixelBuffer: CVPixelBuffer?
-        let status = CVPixelBufferCreate(kCFAllocatorDefault, self.width, self.height, kCVPixelFormatType_32ARGB, options as CFDictionary, &pixelBuffer)
-        
-        guard status == kCVReturnSuccess, let buffer = pixelBuffer else {
-            return nil
+        guard status == kCVReturnSuccess, let _ = pixelBuffer else {
+            return
         }
-        
-        CVPixelBufferLockBaseAddress(buffer, [])
-        let context = CGContext(data: CVPixelBufferGetBaseAddress(buffer),
-                                width: self.width,
-                                height: self.height,
-                                bitsPerComponent: 8,
-                                bytesPerRow: CVPixelBufferGetBytesPerRow(buffer),
-                                space: CGColorSpaceCreateDeviceRGB(),
-                                bitmapInfo: CGImageAlphaInfo.noneSkipFirst.rawValue)
-        
+    }
+    func drawCVPixelBuffer(_ buffer: inout CVPixelBuffer) {
+        let context = CGContext(
+            data: CVPixelBufferGetBaseAddress(buffer),
+            width: self.width,
+            height: self.height,
+            bitsPerComponent: 8,
+            bytesPerRow: CVPixelBufferGetBytesPerRow(buffer),
+            space: CGColorSpaceCreateDeviceRGB(),
+            bitmapInfo: CGImageAlphaInfo.noneSkipFirst.rawValue
+        )
         context?.draw(self, in: CGRect(origin: .zero, size: .init(width: CGFloat(width), height: CGFloat(height))))
-        CVPixelBufferUnlockBaseAddress(buffer, [])
-        return pixelBuffer
+    }
+}
+
+extension CVPixelBuffer {
+    func autoRelease(action: @escaping () -> ()) {
+        CVPixelBufferLockBaseAddress(self, [])
+        action()
+        CVPixelBufferUnlockBaseAddress(self, [])
     }
 }
