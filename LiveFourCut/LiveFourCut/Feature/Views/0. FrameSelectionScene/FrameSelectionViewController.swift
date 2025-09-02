@@ -8,19 +8,20 @@
 import UIKit
 import Combine
 import Photos
-import PhotosUI
-
-
 
 final class FrameSelectionViewController: UIViewController {
     // MARK: - Properties
     private let contentView: FrameSelectionView = .init()
     private var cancellable: Set<AnyCancellable> = []
-    
-    // MARK: - Dependencies
-//    @Dependency
-    private let photoAuthorizationUseCase: PhotoAuthorizationUseCase = DefaultPhotoAuthorizationUseCase()
     private lazy var alertPresenter = FrameSelectionAlertPresenter(viewController: self)
+    
+    
+    private let checkPhotoAuthUseCase: CheckPhotoAuthUseCase = DefaultCheckPhotoAuthUseCase(
+        photoAuthrepository: DefaultPhotoAuthorizationRepository()
+    )
+    private let requestPhotoAuthUseCase: RequestPhotoAuthUseCase = DefaultRequestPhotoAuthUseCase(
+        photoAuthrepository: DefaultPhotoAuthorizationRepository()
+    )
     
     override func loadView() {
         self.view = contentView
@@ -59,7 +60,7 @@ final class FrameSelectionViewController: UIViewController {
     
     /// 사진 권한을 처리하는 메서드
     private func handlePhotoAuthorization() async {
-        let currentStatus = photoAuthorizationUseCase.checkCurrentStatus()
+        let currentStatus = checkPhotoAuthUseCase.execute()
         switch currentStatus.actionType {
         case .proceed:
             await MainActor.run { [weak self] in
@@ -67,7 +68,7 @@ final class FrameSelectionViewController: UIViewController {
                 goToSelectPhotos()
             }
         case .requestPermission:
-            let newStatus = await photoAuthorizationUseCase.requestAuthorization()
+            let newStatus = await requestPhotoAuthUseCase.execute()
             switch newStatus.actionType {
             case .proceed:
                 await MainActor.run { [weak self] in
@@ -104,7 +105,10 @@ final class FrameSelectionViewController: UIViewController {
     
     private func goToSelectPhotos() {
         let frameCount = Constants.frameCount
-        let photoSelectionViewController = PhotoSelectionViewController(frameCount: frameCount)
+        let photoSelectionViewController = PhotoSelectionViewController(
+            viewModel: ThumbnailSelectorVM(),
+            frameCount: frameCount
+        )
         navigationController?.pushViewController(
             photoSelectionViewController,
             animated: true)

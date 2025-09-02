@@ -7,6 +7,7 @@
 
 import UIKit
 
+@MainActor
 struct FrameSelectionAlertPresenter {
     private weak var viewController: UIViewController?
     

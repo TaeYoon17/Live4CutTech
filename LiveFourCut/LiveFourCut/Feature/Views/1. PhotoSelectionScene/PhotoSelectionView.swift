@@ -17,6 +17,7 @@ final class PhotoSelectionView: UIView {
     }
     
     let eventPublisher = PassthroughSubject<Event, Never>()
+    
     private weak var viewModel: ThumbnailSelectorVM!
     //MARK: -- View 저장 프로퍼티
     lazy var thumbnailFrameView = ThumbnailFourFrameView(viewModel: viewModel)

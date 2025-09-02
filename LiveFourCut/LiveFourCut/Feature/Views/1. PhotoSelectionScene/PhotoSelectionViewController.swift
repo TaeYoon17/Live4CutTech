@@ -27,7 +27,7 @@ final class PhotoSelectionViewController: LoadingVC {
     
     private var cancellable = Set<AnyCancellable>()
     init(
-        viewModel: ThumbnailSelectorVM = .init(),
+        viewModel: ThumbnailSelectorVM,
         frameCount: Int = 0
     ) {
         self.viewModel = viewModel
