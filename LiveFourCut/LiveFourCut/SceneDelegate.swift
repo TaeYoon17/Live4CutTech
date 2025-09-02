@@ -15,9 +15,6 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         guard let windowScene = (scene as? UIWindowScene) else { return }
         window = UIWindow(windowScene: windowScene)
         self.window?.rootViewController = UINavigationController(rootViewController: FrameSelectionViewController())
-//        Test.main
-//        UINavigationController(rootViewController: FrameSelectionViewController())
-//        self.window?.rootViewController = UINavigationController(rootViewController: SharingViewController())
         self.window?.makeKeyAndVisible()
     }
 

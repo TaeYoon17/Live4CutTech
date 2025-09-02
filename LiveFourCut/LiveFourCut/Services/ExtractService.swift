@@ -9,18 +9,19 @@ import Foundation
 import AVFoundation
 import CoreImage
 import Accelerate
-enum ExtractError: Error{
+enum ExtractError: Error {
     case emptyContainer
 }
 class ExtractService{
     var avAssetContainers: [AVAssetContainer] = []
     var minDuration: Double = 0.47
-    var frameCounts:Int{ avAssetContainers.count }
+    var frameCounts:Int { avAssetContainers.count }
     private let fps:Double = 24
     func extractFrameImages() async throws -> [[CGImage]] {
         guard !avAssetContainers.isEmpty else { throw ExtractError.emptyContainer }
+        
         let imageDatas: [[CGImage]] = try await withThrowingTaskGroup(of: (Int,[CGImage]).self) { taskGroup in
-            for (offset,v) in avAssetContainers.enumerated(){
+            for (offset,v) in avAssetContainers.enumerated() {
                 taskGroup.addTask {[self, minDuration,fps] in
                     let asset = AVAsset(url: URL(string: v.originalAssetURL)!)
                     let generator = AVAssetImageGenerator(asset: asset)
@@ -37,7 +38,7 @@ class ExtractService{
                     for idx in (1..<Int(minDuration * fps)){
                         let time = CMTime(seconds: Double(idx) / 24, preferredTimescale: 600)
                         let imgContain = try? await generator.image(at: time)
-                        if let imgContain{
+                        if let imgContain {
                             let downImage = self.downsampleVImage(image: imgContain.image)
                             imageDatas.append(downImage)
                             lastImage = downImage
@@ -70,7 +71,10 @@ extension ExtractService {
     }
 }
 extension ExtractService {
-    func downsampleVImage(image: CGImage, targetSize: CGSize = .init(width: 300, height: 300*1.77)) -> CGImage {
+    func downsampleVImage(
+        image: CGImage,
+        targetSize: CGSize = .init(width: 480, height: 480 * 1.77)
+    ) -> CGImage {
         guard let format = vImage_CGImageFormat(
             bitsPerComponent: 8,
             bitsPerPixel: 32,
@@ -80,13 +84,16 @@ extension ExtractService {
         ) else {
             return image
         }
+        
         do {
             var sourceBuffer = try vImage_Buffer(cgImage: image, format: format)
             var destinationBuffer = vImage_Buffer()
+            
             defer {
                 free(destinationBuffer.data)
                 free(sourceBuffer.data)
             }
+            
             // 이미지 크기 조절 알고리즘
             let scaleX = targetSize.width / CGFloat(image.width)
             let scaleY = targetSize.height / CGFloat(image.height)
@@ -105,7 +112,10 @@ extension ExtractService {
             
             let destCGImage = try destinationBuffer.createCGImage(format: format)
             print("Prev Downsampling image data size ", image.width * image.height * 4 / 1024)
+            print("Prev image size: \(image.width)X\(image.height)")
+            print("----------------------------------------------------------")
             print("After Downsampling image data size ", destCGImage.width * destCGImage.height * 4 / 1024)
+            print("After image size: \(destCGImage.width)X\(destCGImage.height)")
             return destCGImage
         } catch {
             return image

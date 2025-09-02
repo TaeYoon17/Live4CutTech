@@ -105,7 +105,7 @@ final class PhotoSelectionViewController: LoadingVC{
         }
         thumbnailSelectorView.vm = vm
         thumbnailFrameView.vm = vm
-        self.reSelectPhotoBtn.action = {[weak self] in
+        self.reSelectPhotoBtn.action = { [weak self] in
             self?.openPickerVC()
         }
     }
@@ -190,13 +190,21 @@ final class PhotoSelectionViewController: LoadingVC{
         self.present(phVC , animated: true)
     }
     func denyPagingOrder(){
-        let alertController = UIAlertController(title: "4장을 선택해주세요", message: nil, preferredStyle: .alert)
+        let denyMessage = PHPhotoLibrary.authorizationStatus(for: .readWrite) == .limited ? "접근 가능한 사진들을 선택했는지 확인 부탁드려요\n 전체 접근으로 권한 변경하는 것을 추천드려요" : nil
+        let alertController = UIAlertController(title: "4장을 선택해주세요", message: denyMessage, preferredStyle: .alert)
         alertController.addAction(.init(title: "돌아가기", style: .cancel,handler: {[weak self] _ in
             self?.navigationController?.popViewController(animated: true)
         }))
         alertController.addAction(.init(title: "다시 선택하기", style: .default, handler: {[weak self] _ in
             self?.openPickerVC()
         }))
+        if(PHPhotoLibrary.authorizationStatus(for: .readWrite) == .limited){
+            alertController.addAction(.init(title: "전체 접근으로 권한 변경", style: .default,handler: { _ in
+                if let appSettings = URL(string: UIApplication.openSettingsURLString) {
+                    UIApplication.shared.open(appSettings)
+                }
+            }))
+        }
         self.present(alertController, animated: true)
     }
 }
@@ -219,7 +227,7 @@ extension PhotoSelectionViewController:PHPickerViewControllerDelegate{
             self.vm.resetSelectImage()
         }
         self.dismiss(animated: true){[weak self] in
-            if assets.count == 0{
+            if assets.count == 0 && PHPhotoLibrary.authorizationStatus(for: .readWrite) == .authorized{
                 if !(self?.isPagingEnabled ?? false){
                     self?.navigationController?.popViewController(animated: true)
                 }

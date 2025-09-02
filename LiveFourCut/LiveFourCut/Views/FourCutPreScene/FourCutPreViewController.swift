@@ -8,7 +8,7 @@
 import UIKit
 import Combine
 import CoreMedia
-final class FourCutPreViewController: BaseVC{
+final class FourCutPreViewController: BaseVC {
     // MARK: -- Service 연결
     let extractService = ExtractService()
     let frameService = FrameGenerator()
@@ -81,6 +81,7 @@ final class FourCutPreViewController: BaseVC{
             make.centerY.equalToSuperview()
         }
     }
+    
     override func configureNavigation() {
         self.view.addSubview(navigationBackButton)
         navigationBackButton.snp.makeConstraints { make in
@@ -91,18 +92,20 @@ final class FourCutPreViewController: BaseVC{
             self?.navigationController?.popViewController(animated: true)
         }
     }
+    
     override func configureView() {
         self.view.backgroundColor = .systemBackground
         
         shareBtn.action = {[weak self] in
             guard let self else { return }
             self.view.isUserInteractionEnabled = false
-            Task{[weak self] in
+            Task{ [weak self] in
                 guard let self else { return }
-                let interactionEnabled = { Task{@MainActor in self.view.isUserInteractionEnabled = true } }
+                let interactionEnabled = {
+                    Task{ @MainActor in self.view.isUserInteractionEnabled = true }
+                }
                 self.extractService.minDuration = Double(self.minDuration)
-                print("minDuration \(self.minDuration)")
-                do{
+                do {
                     let prevTime = CFAbsoluteTimeGetCurrent()
                     var frameImages = try await self.extractService.extractFrameImages()
                     let nowTime = CFAbsoluteTimeGetCurrent()
@@ -110,14 +113,20 @@ final class FourCutPreViewController: BaseVC{
                     var imgDatas:[CGImage] = try await self.frameService.groupReduce(groupImage: frameImages, spacing: 4)
                     print("추출은 된다. \(frameImages.first?.count)")
                     print("감소는 된다. \(imgDatas.count)")
-                    frameImages = [] // 함수 사용 후 스택에서 제거해야한다.
                     let outputURL = FileManager.default.temporaryDirectory.appendingPathComponent("LiveFourCut.mp4")
                     if FileManager.default.fileExists(atPath: outputURL.path()){
                         try? FileManager.default.removeItem(at: outputURL)
                     }
-                    let videoCreator = VideoCreator(videoSize: self.frameService.frameTargetSize, outputURL: outputURL)
+                    frameImages = []
+                    try? await Task.sleep(for: .milliseconds(100))
+                    
+                    let videoCreator = VideoCreator(
+                        videoSize: self.frameService.frameTargetSize,
+                        outputURL: outputURL
+                    )
+                    
                     videoCreator.createVideo(from: &imgDatas) { success, error in
-                        if success{
+                        if success {
                             DispatchQueue.main.async {
                                 let sharingViewController = SharingViewController()
                                 sharingViewController.videoURL = outputURL
@@ -125,7 +134,7 @@ final class FourCutPreViewController: BaseVC{
                                 self.navigationController?.pushViewController(sharingViewController, animated: true)
                                 _ = interactionEnabled()
                             }
-                        }else{
+                        } else {
                             _ = interactionEnabled()
                         }
                     }
