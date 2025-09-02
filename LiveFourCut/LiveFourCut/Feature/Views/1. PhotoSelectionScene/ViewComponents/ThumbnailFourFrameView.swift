@@ -8,74 +8,85 @@
 import UIKit
 import Combine
 
-extension PhotoSelectionViewController {
-    final class ThumbnailFourFrameView:UIStackView {
-        weak var vm: ThumbnailSelectorVM! {
-            didSet{
-                guard let vm else { return }
-                vm.selectImageContainerSubject.sink { [weak self] containerList in
-                    containerList.enumerated().forEach { ele in
-                        self?.imageViews[ele.offset].container = ele.element
-                    }
-                }.store(in: &cancellable)
-                for cardView in imageViews{
-                    cardView.action = { container in
-                        vm.removeSelectImage(containerID: container.id)
-                    }
-                }
+final class ThumbnailFourFrameView: UIStackView {
+    private weak var vm: ThumbnailSelectorVM!
+    
+    var selector: [Bool] = Array(repeating: false, count: Constants.frameCount)
+    
+    private let frameSpacing: CGFloat = 4
+    private var imageViews: [ThumbnailCardView] = (0..<4).map{ThumbnailCardView(image: nil, number: $0 + 1)}
+    private lazy var upperStack = {
+        let subViews = [imageViews[0],imageViews[1]]
+        let stView = UIStackView(arrangedSubviews: subViews)
+        stView.axis = .horizontal
+        stView.alignment = .fill
+        stView.distribution = .fillEqually
+        stView.spacing = frameSpacing
+        return stView
+    }()
+    
+    private lazy var lowerStack = {
+        let subViews = [imageViews[2],imageViews[3]]
+        let stView = UIStackView(arrangedSubviews: subViews)
+        stView.axis = .horizontal
+        stView.distribution = .fillEqually
+        stView.alignment = .fill
+        stView.spacing = frameSpacing
+        return stView
+    }()
+    
+    private var cancellable = Set<AnyCancellable>()
+    
+    init(viewModel: ThumbnailSelectorVM) {
+        super.init(frame: .zero)
+        vm = viewModel
+        [upperStack, lowerStack].forEach { item in
+            self.addArrangedSubview(item)
+        }
+        
+        self.axis = .vertical
+        self.alignment = .fill
+        self.distribution = .fillEqually
+        self.spacing = frameSpacing
+        self.backgroundColor = .black
+        self.isLayoutMarginsRelativeArrangement = true
+        self.layoutMargins = UIEdgeInsets(
+            top: frameSpacing,
+            left: frameSpacing,
+            bottom: frameSpacing,
+            right: frameSpacing
+        )
+        self.tag = 0
+        
+        vm.selectImageContainerSubject.sink { [weak self] containerList in
+            containerList.enumerated().forEach { ele in
+                self?.imageViews[ele.offset].container = ele.element
             }
-        }
-        var selector:[Bool] = Array(repeating: false, count: 4)
-        let frameSpacing: CGFloat = 4
-        private var imageViews:[ThumbnailCardView] = (0..<4).map{ThumbnailCardView(image: nil, number: $0 + 1)}
-        private lazy var upperStack = {
-            let subViews = [imageViews[0],imageViews[1]]
-            let stView = UIStackView(arrangedSubviews: subViews)
-            stView.axis = .horizontal
-            stView.alignment = .fill
-            stView.distribution = .fillEqually
-            stView.spacing = frameSpacing
-            return stView
-        }()
-        private lazy var lowerStack = {
-            let subViews = [imageViews[2],imageViews[3]]
-            let stView = UIStackView(arrangedSubviews: subViews)
-            stView.axis = .horizontal
-            stView.distribution = .fillEqually
-            stView.alignment = .fill
-            stView.spacing = frameSpacing
-            return stView
-        }()
-        var cancellable = Set<AnyCancellable>()
-        init(){
-            super.init(frame: .zero)
-            [upperStack,lowerStack].forEach{ item in
-                self.addArrangedSubview(item)
-            }
-            self.axis = .vertical
-            self.alignment = .fill
-            self.distribution = .fillEqually
-            self.spacing = frameSpacing
-            self.backgroundColor = .black
-            self.isLayoutMarginsRelativeArrangement = true
-            self.layoutMargins = UIEdgeInsets(top: frameSpacing, left: frameSpacing, bottom: frameSpacing, right: frameSpacing)
-            self.tag = 0
-        }
-        required init(coder: NSCoder) {
-            fatalError("init(coder:) has not been implemented")
-        }
-        func reset(){
-            imageViews.forEach { item in
-                item.container = nil
+        }.store(in: &cancellable)
+        for cardView in imageViews {
+            cardView.action = { [weak self] container in
+                guard let self else { return }
+                vm.removeSelectImage(containerID: container.id)
             }
         }
     }
+    required init(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    func reset() {
+        imageViews.forEach { item in
+            item.container = nil
+        }
+    }
 }
-extension PhotoSelectionViewController.ThumbnailFourFrameView {
-    class ThumbnailCardView:CardView{
+
+extension ThumbnailFourFrameView {
+    final class ThumbnailCardView: CardView {
+        
         private let cancelButton: UIButton = .init()
-        override var thumbnail: UIImage?{
-            didSet{
+        
+        override var thumbnail: UIImage? {
+            didSet {
                 guard let thumbnail else {
                     self.image = nil
                     self.cancelButton.isHidden = true
@@ -87,8 +98,9 @@ extension PhotoSelectionViewController.ThumbnailFourFrameView {
                 self.numberLabel.isHidden = true
             }
         }
-        var container:ImageContainer?{
-            didSet{
+        
+        var container: ImageContainer? {
+            didSet {
                 guard let container else {
                     self.thumbnail = nil
                     return
@@ -96,7 +108,9 @@ extension PhotoSelectionViewController.ThumbnailFourFrameView {
                 self.thumbnail = container.image
             }
         }
-        var action:((ImageContainer)->())?
+        
+        var action: ((ImageContainer) -> ())?
+        
         override init(image: UIImage? = nil, number: Int?) {
             super.init(image: image, number: number)
             var config = UIButton.Configuration.plain()
@@ -114,12 +128,16 @@ extension PhotoSelectionViewController.ThumbnailFourFrameView {
                 make.top.trailing.equalToSuperview().inset(4)
             }
         }
-        @objc func cancelBtnTapped(sender: UIButton){
-            guard let container else {return}
-            action?(container)
-        }
+        
         required init?(coder: NSCoder) {
             fatalError("Don't use storyboard")
         }
+        
+        @objc func cancelBtnTapped(sender: UIButton) {
+            guard let container else {return}
+            action?(container)
+        }
+        
+        
     }
 }

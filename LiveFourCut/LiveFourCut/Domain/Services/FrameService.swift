@@ -7,23 +7,17 @@
 
 import Foundation
 import UIKit
-enum FrameError: Error {
-    case flipFailed
-    case renderFailed
-}
-enum FrameType {
-    case basic2x2
-}
+
 protocol FrameServiceProtocol {
     var frameType:FrameType { get }
     var frameTargetSize: CGSize { get }
     var frameCornerRadius: CGFloat { get }
     
-    func reduce(images:[CGImage],spacing:CGFloat) throws -> CGImage
+    func reduce(images:[CGImage], spacing:CGFloat) throws -> CGImage
 }
 
 final class FrameGenerator: FrameServiceProtocol {
-    var frameType:FrameType = .basic2x2
+    var frameType: FrameType = .basic2x2
     var frameTargetSize: CGSize = .init(width: 480, height: 480 * 1.77)
     var frameCornerRadius: CGFloat = 0
     
@@ -51,7 +45,7 @@ final class FrameGenerator: FrameServiceProtocol {
         
     }
 }
-extension FrameGenerator{
+extension FrameGenerator {
     func reduce(images:[CGImage],spacing:CGFloat) throws -> CGImage {
         let frameTargetSize = frameTargetSize
         let frameCornerRadius = frameCornerRadius
@@ -60,7 +54,6 @@ extension FrameGenerator{
             let (height,width) = (CGFloat(flippedImg.height), CGFloat(flippedImg.width))
             let centerCropSize = CGRect.cropFromCenter(width: width, height: height,ratio: frameTargetSize.ratio)
             return flippedImg.cropping(to: centerCropSize)!
-//                .makeRoundedCorner(radius: frameCornerRadius  * centerCropSize.width / frameTargetSize.width)!
         }
         let nW = 0.5 * frameTargetSize.width - 1.5 * spacing
         let nH = 0.5 * frameTargetSize.height - 1.5 * spacing

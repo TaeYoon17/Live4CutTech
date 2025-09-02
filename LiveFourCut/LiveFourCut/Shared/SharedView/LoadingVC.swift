@@ -10,17 +10,27 @@ class LoadingVC: BaseVC {
     var loadingAlertView: UIAlertController?
     var loadingProgressView: UIProgressView?
     
-    func presentLoadingAlert(title:String? = "Please wait", message:String?, cancelAction:@escaping ()->()) {
+    func presentLoadingAlert(
+        title: String? = "Please wait",
+        message: String?,
+        cancelAction: @escaping () -> ()
+    ) {
         let alertView = UIAlertController(title: title, message: message, preferredStyle: .alert)
         self.loadingAlertView = alertView
         
-        alertView.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: {[weak self] _ in
-            self?.loadingAlertView?.dismiss(animated: true){
-                self?.loadingAlertView = nil
-                self?.loadingProgressView = nil
-                cancelAction()
-            }
-        }))
+        alertView.addAction(
+            UIAlertAction(
+                title: "Cancel",
+                style: .cancel,
+                handler: { [weak self] _ in
+                    self?.loadingAlertView?.dismiss(animated: true) {
+                        self?.loadingAlertView = nil
+                        self?.loadingProgressView = nil
+                        cancelAction()
+                    }
+                }
+            )
+        )
         
         present(alertView, animated: true, completion: {
             //  Add your progressbar after alert is shown (and measured)
@@ -33,6 +43,7 @@ class LoadingVC: BaseVC {
         })
         
     }
+    
     func dismissLoadingAlert(completion:@escaping ()->()){
         loadingAlertView?.dismiss(animated: true){
             self.loadingProgressView = nil

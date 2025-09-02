@@ -8,8 +8,8 @@
 import Foundation
 import Photos
 import UIKit
-extension PHAsset{
-    
+
+extension PHAsset {
     func convertToUIImage(size:CGSize? = nil) async throws -> UIImage {
         // reqeustContentEditingInput 코드를 비동기로 변환
         try await withCheckedThrowingContinuation { [weak self] continuation in
@@ -29,8 +29,7 @@ extension PHAsset{
         }
     }
     
-    private func coreDownSample(resource:CGImageSource,size:CGSize? = nil) -> UIImage{
-        
+    private func coreDownSample(resource:CGImageSource,size:CGSize? = nil) -> UIImage {
         let scale = UIScreen.main.scale
         let screenSize = UIScreen.main.bounds
         let maxPixel = if let size{
@@ -51,8 +50,9 @@ extension PHAsset{
         }
     }
 }
-extension UIImage{
-    private func coreDownSample(size:CGSize? = nil) -> UIImage{
+
+extension UIImage {
+    private func coreDownSample(size:CGSize? = nil) -> UIImage {
         let imageSourceOption = [kCGImageSourceShouldCache: false] as CFDictionary
         let data = self.pngData() as! CFData
         let imageSource: CGImageSource = CGImageSourceCreateWithData(data, imageSourceOption)!

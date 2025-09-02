@@ -9,14 +9,12 @@ import Foundation
 import AVFoundation
 import CoreImage
 import Accelerate
-enum ExtractError: Error {
-    case emptyContainer
-}
-class ExtractService{
+
+final class ExtractService {
     var avAssetContainers: [AVAssetContainer] = []
     var minDuration: Double = 0.47
-    var frameCounts:Int { avAssetContainers.count }
-    private let fps:Double = 24
+    var frameCounts: Int { avAssetContainers.count }
+    private let fps: Double = 24
     func extractFrameImages() async throws -> [[CGImage]] {
         guard !avAssetContainers.isEmpty else { throw ExtractError.emptyContainer }
         

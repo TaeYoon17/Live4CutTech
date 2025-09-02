@@ -9,10 +9,11 @@ import Foundation
 import Photos
 import PhotosUI
 import Combine
-enum LPtoAVError:Error { }
+
+enum LPtoAVError: Error { }
 
 protocol LPtoAVServiceProtocol { }
-actor LPtoAVService: NSObject{
+actor LPtoAVService: NSObject {
     private var originURLAssets:[(String,AVURLAsset)] = []
     private var assetCounter:Int = -1{
         didSet{
@@ -27,7 +28,7 @@ actor LPtoAVService: NSObject{
             }
         }
     }
-    var minDuration:Float = 1000
+    var minDuration: Float = 1000
     let wow: PassthroughSubject<[AVURLAsset],Never> = .init()
     
     private let videoManagerManager: PHCachingImageManager = .init()
@@ -36,28 +37,27 @@ actor LPtoAVService: NSObject{
     override init() {
         super.init()
     }
-    func presentAlbumPicker(){
+    func presentAlbumPicker() {
         
     }
 }
-extension LPtoAVService{
+extension LPtoAVService {
     
-    func pickerResultAppender(assets:PHFetchResult<PHAsset>) {
-//        PHLivePhoto()
+    func pickerResultAppender(assets: PHFetchResult<PHAsset>) {
         assetCounter = assets.count
         originURLAssets.removeAll()
         minDuration = 1000
         assets.enumerateObjects(options: .concurrent) { asset, idx, pointer in
             let convertedIdentifier = asset.localIdentifier.replacingOccurrences(of: "/", with: "_")
-            Task{
-                do{
+            Task {
+                do {
                     let urlAsset:AVURLAsset = try await asset.convertToAVURLAsset()
                     let value:Float = (try? await Float(urlAsset.load(.duration).value)) ?? 1 // 여기 에러 처리 필요함
                     let timeScale: Float = (try? await Float(urlAsset.load(.duration).timescale)) ?? 1 // 여기 에러 처리 필요함
                     let secondsLength = value / timeScale
                     self.minDuration = min(secondsLength,self.minDuration)
                     self.originURLAssets.append((convertedIdentifier,urlAsset))
-                }catch{
+                } catch {
                     fatalError("영상 추출 에러")
                 }
                 self.assetCounter -= 1
@@ -65,7 +65,7 @@ extension LPtoAVService{
         }
         
     }
-    func adaptNewMedias() async throws{
+    func adaptNewMedias() async throws {
             let newAssets:[AVURLAsset] = try await originURLAssets.asyncMap({ v in
                 try await v.1.createClippeAVURLAsset(identifier: v.0, end: self.minDuration)
             })
@@ -89,8 +89,8 @@ extension PHAsset{
     }
     
 }
-extension AVAsset{
-    func createClippeAVURLAsset(identifier: String,start:Float = 0,end:Float) async throws -> AVURLAsset{
+extension AVAsset {
+    func createClippeAVURLAsset(identifier: String,start:Float = 0,end:Float) async throws -> AVURLAsset {
         let startTime = CMTime(seconds: Double(start), preferredTimescale: 600)
         let endTime = CMTime(seconds: Double(end), preferredTimescale: 600)
         let timeRange = CMTimeRange(start: startTime, end: endTime)

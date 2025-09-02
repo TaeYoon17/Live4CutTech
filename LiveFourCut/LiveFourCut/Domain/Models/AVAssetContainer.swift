@@ -6,11 +6,10 @@
 //
 
 import Foundation
-import AVFoundation
 
-struct AVAssetContainer:Identifiable {
+struct AVAssetContainer: Identifiable {
     var id: String
     let idx: Int
-    let minDuration:Float
-    let originalAssetURL:String
+    let minDuration: Float
+    let originalAssetURL: String
 }

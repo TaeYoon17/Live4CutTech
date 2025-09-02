@@ -12,7 +12,7 @@ import UIKit
 
 actor ThumbnailExecutor {
     let thumbnailsSubject: PassthroughSubject<[ImageContainer],Never> = .init()
-    let progressSubject:PassthroughSubject<Float,Never> = .init()
+    let progressSubject: PassthroughSubject<Float,Never> = .init()
     private var result: PHFetchResult<PHAsset>!
     private let imageManager: PHCachingImageManager = .init()
     
@@ -47,10 +47,11 @@ actor ThumbnailExecutor {
         }
     }
     
-    func setFetchResult(result: PHFetchResult<PHAsset>) async{
+    func setFetchResult(result: PHFetchResult<PHAsset>) async {
         self.result = result
     }
-    func run() async{
+    
+    func run() async {
         counter = result.count
         fetchItems.removeAll()
         self.progressSubject.send(0)
@@ -59,6 +60,7 @@ actor ThumbnailExecutor {
             self.fetchAssets.append(asset)
         }
     }
+    
     private func fetchImage(
         phAsset: PHAsset,
         size: CGSize,

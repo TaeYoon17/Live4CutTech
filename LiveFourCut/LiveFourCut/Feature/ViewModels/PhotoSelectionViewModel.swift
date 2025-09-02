@@ -11,12 +11,14 @@ import Combine
 
 final class ThumbnailSelectorVM {
     
-    let selectImageContainerSubject: CurrentValueSubject<[ImageContainer?],Never> = .init([nil,nil,nil,nil])
+    let selectImageContainerSubject: CurrentValueSubject<[ImageContainer?],Never> = .init((0..<Constants.frameCount).map { _ in nil })
     
     lazy var pagingAvailable = selectImageContainerSubject.map{ !$0.contains(where: {$0 == nil}) }.eraseToAnyPublisher()
     
-    lazy var selectedImageIndexes = selectImageContainerSubject.map{ containerList in
-        (0..<4).map({containerList.map(\.?.idx).contains($0)})
+    lazy var selectedImageIndexes = selectImageContainerSubject.map { containerList in
+        (0..<Constants.frameCount).map {
+            containerList.map(\.?.idx).contains($0)
+        }
     }.eraseToAnyPublisher()
     
     private var imageContainers: [ImageContainer] = []
@@ -30,7 +32,7 @@ final class ThumbnailSelectorVM {
     @discardableResult
     func appendSelectImage(container: ImageContainer) -> Int {
         var currentSubjectValue = self.selectImageContainerSubject.value
-        let firstIdx = currentSubjectValue.firstIndex(where: {$0 == nil}).map{Int($0)}!
+        let firstIdx = currentSubjectValue.firstIndex(where: {$0 == nil}).map{ Int($0) }!
         currentSubjectValue[firstIdx] = container
         selectImageContainerSubject.send(currentSubjectValue)
         return firstIdx
@@ -51,6 +53,6 @@ final class ThumbnailSelectorVM {
     }
     
     func resetSelectImage() {
-        selectImageContainerSubject.send([nil,nil,nil,nil])
+        selectImageContainerSubject.send((0..<Constants.frameCount).map { _ in nil })
     }
 }

@@ -9,7 +9,7 @@ import Foundation
 import UIKit
 import AVFoundation
 import Combine
-extension FourCutPreViewController.PreFourFrameView{
+extension PreFourFrameView {
     final class PreCardView: UIView {
         var minDuration: Float = 1000{
             didSet{
