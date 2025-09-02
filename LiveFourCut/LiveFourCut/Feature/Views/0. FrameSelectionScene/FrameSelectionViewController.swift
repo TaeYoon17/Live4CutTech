@@ -10,11 +10,17 @@ import Combine
 import Photos
 import PhotosUI
 
+
+
 final class FrameSelectionViewController: UIViewController {
     // MARK: - Properties
     private let contentView: FrameSelectionView = .init()
-    private var nowPhotoAccessStatus: PHAuthorizationStatus!
     private var cancellable: Set<AnyCancellable> = []
+    
+    // MARK: - Dependencies
+//    @Dependency
+    private let photoAuthorizationUseCase: PhotoAuthorizationUseCase = DefaultPhotoAuthorizationUseCase()
+    private lazy var alertPresenter = FrameSelectionAlertPresenter(viewController: self)
     
     override func loadView() {
         self.view = contentView
@@ -25,13 +31,12 @@ final class FrameSelectionViewController: UIViewController {
         super.viewDidLoad()
         self.navigationController?.setNavigationBarHidden(true, animated: false)
         self.title = "프레임 선택"
-        self.setupPhotoKit()
         bindAction()
     }
     
     override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
         self.navigationController?.setNavigationBarHidden(true, animated: false)
-        self.nowPhotoAccessStatus = PHPhotoLibrary.authorizationStatus(for: .readWrite)
     }
     
     // MARK: -- View Bind Action
@@ -41,66 +46,60 @@ final class FrameSelectionViewController: UIViewController {
             .sink { [weak self] event in
             guard let self else { return }
             switch event {
-            case .frameSelected(let frameType):
-                frameStackViewTapped(frameType: frameType)
+            case .frameSelected(let frameType): frameStackViewTapped(frameType: frameType)
             }
         }.store(in: &cancellable)
     }
     
-    // MARK: - Setup
-    private func setupPhotoKit() {
-        self.nowPhotoAccessStatus = PHPhotoLibrary.authorizationStatus(for: .readWrite)
-        switch self.nowPhotoAccessStatus {
-        case .notDetermined:
-            PHPhotoLibrary.requestAuthorization(for: .readWrite) { [weak self] status in
-                self?.nowPhotoAccessStatus = status
+    // MARK: - Functions
+    /// 프레임이 선택되었을 시 동작 함수
+    private func frameStackViewTapped(frameType: FrameType) {
+        Task { await handlePhotoAuthorization() }
+    }
+    
+    /// 사진 권한을 처리하는 메서드
+    private func handlePhotoAuthorization() async {
+        let currentStatus = photoAuthorizationUseCase.checkCurrentStatus()
+        switch currentStatus.actionType {
+        case .proceed:
+            await MainActor.run { [weak self] in
+                guard let self else { return }
+                goToSelectPhotos()
             }
-        default: break
+        case .requestPermission:
+            let newStatus = await photoAuthorizationUseCase.requestAuthorization()
+            switch newStatus.actionType {
+            case .proceed:
+                await MainActor.run { [weak self] in
+                    guard let self else { return }
+                    goToSelectPhotos()
+                }
+            default: await showAlert(for: newStatus)
+            }
+        case .showSettingsAlert: await showAlert(for: currentStatus)
+        case .showErrorAlert: await showAlert(for: currentStatus)
         }
     }
     
-    // MARK: - Functions
-    /// 프레임에 추가할 새로운 Frame 생성하는 함수
-    /// 프레임이 선택되었을 시 동작 함수
-    private func frameStackViewTapped(frameType: FrameType) {
-        guard let nowPhotoAccessStatus = self.nowPhotoAccessStatus else { return }
-        switch nowPhotoAccessStatus {
-        case .authorized: self.goToSelectPhotos()
-        case .denied:
-            let alertController = UIAlertController(
-                title: "앨범 접근을 허용해주세요!",
-                message: "[사진 > 전체 접근]을 허용해주세요",
-                preferredStyle: .alert
+    /// 권한 상태에 따른 알림창을 표시하는 메서드
+    private func showAlert(for status: AlbumAuthorization) async {
+        guard let alertInfo = status.alertInfo else { return }
+        switch status.actionType {
+        case .showSettingsAlert:
+            self.alertPresenter.presentSettingsAlert(
+                title: alertInfo.title,
+                message: alertInfo.message
+            ) {
+                guard let appSettings = URL(string: UIApplication.openSettingsURLString) else { return }
+                UIApplication.shared.open(appSettings)
+            }
+        case .showErrorAlert:
+            self.alertPresenter.presentErrorAlert(
+                title: alertInfo.title,
+                message: alertInfo.message
             )
-            alertController.addAction(.init(title: "확인", style: .default,handler: { [weak self] action in
-                guard self != nil else { return }
-                if let appSettings = URL(string: UIApplication.openSettingsURLString) {
-                    UIApplication.shared.open(appSettings)
-                }
-            }))
-            alertController.addAction(.init(title: "취소", style: .cancel))
-            self.present(alertController, animated: true)
-        case .limited:
-            let alertController = UIAlertController(
-                title: "앨범 접근을 허용해주세요!",
-                message: "[사진 > 전체 접근]을 허용해주세요",
-                preferredStyle: .alert
-            )
-            alertController.addAction(.init(title: "확인", style: .default,handler: { [weak self] action in
-                guard self != nil else { return }
-                if let appSettings = URL(string: UIApplication.openSettingsURLString) {
-                    UIApplication.shared.open(appSettings)
-                }
-            }))
-            alertController.addAction(.init(title: "취소", style: .cancel))
-            self.present(alertController, animated: true)
-        case .restricted, .notDetermined:
-            let alertController = UIAlertController(title: "현재 사용할 수 없습니다", message: "앨범 접근을 할 수 없어요\n 빠르게 수정해드리겠습니다!!", preferredStyle: .alert)
-            alertController.addAction(.init(title: "확인", style: .cancel))
-            self.present(alertController, animated: true)
-        @unknown default: break
+        default: return
         }
-        
     }
     
     private func goToSelectPhotos() {

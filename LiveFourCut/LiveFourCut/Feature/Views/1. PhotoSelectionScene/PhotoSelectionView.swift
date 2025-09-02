@@ -9,6 +9,7 @@ import UIKit
 import Combine
 
 final class PhotoSelectionView: UIView {
+    
     enum Event {
         case navigationBack
         case selectDone

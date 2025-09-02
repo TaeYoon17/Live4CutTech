@@ -26,7 +26,7 @@ final class FrameSelectionView: UIView {
     private let descLabel: UILabel = {
         let label = UILabel()
         label.text = "라이브로 찍은 이미지를 골라주세요!"
-        label.font = .systemFont(ofSize: 20,weight: .regular)
+        label.font = .systemFont(ofSize: 20, weight: .regular)
         return label
     }()
     
@@ -51,14 +51,14 @@ final class FrameSelectionView: UIView {
         return stackView
     }()
     
-    private var infoImageView: UIImageView = {
+    private let infoImageView: UIImageView = {
         var imageView = UIImageView()
         imageView.contentMode = .scaleAspectFit
         imageView.image = .empty
         return imageView
     }()
     
-    private var infoLabel: UILabel = {
+    private let infoLabel: UILabel = {
        let label = UILabel()
         label.text = "라이브 이미지 4장을\n업로드 해주세요!"
         label.textAlignment = .center
@@ -86,10 +86,11 @@ final class FrameSelectionView: UIView {
         fatalError("init(coder:) has not been implemented")
     }
     
-    private func setupUI(){
+    private func setupUI() {
         [frameLabel, descLabel, outerFrameView].forEach { self.addSubview($0) }
         outerFrameView.addSubview(infoStackView)
     }
+    
     private func setupConstraints() {
         frameLabel.snp.makeConstraints {
             $0.top.equalTo(safeAreaLayoutGuide).offset(38)
@@ -119,5 +120,4 @@ final class FrameSelectionView: UIView {
             eventPublisher.send(.frameSelected(.basic2x2))
         }
     }
-    
 }
