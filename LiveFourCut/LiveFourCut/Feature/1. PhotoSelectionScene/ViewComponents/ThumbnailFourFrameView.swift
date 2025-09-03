@@ -9,7 +9,7 @@ import UIKit
 import Combine
 
 final class ThumbnailFourFrameView: UIStackView {
-    private weak var vm: ThumbnailSelectorVM!
+    private weak var thumbnailSelector: ThumbnailSelectorProtocol!
     
     var selector: [Bool] = Array(repeating: false, count: Constants.frameCount)
     
@@ -37,9 +37,9 @@ final class ThumbnailFourFrameView: UIStackView {
     
     private var cancellable = Set<AnyCancellable>()
     
-    init(viewModel: ThumbnailSelectorVM) {
+    init(thumbnailSelector: ThumbnailSelectorProtocol) {
         super.init(frame: .zero)
-        vm = viewModel
+        self.thumbnailSelector = thumbnailSelector
         [upperStack, lowerStack].forEach { item in
             self.addArrangedSubview(item)
         }
@@ -58,7 +58,7 @@ final class ThumbnailFourFrameView: UIStackView {
         )
         self.tag = 0
         
-        vm.selectImageContainerSubject.sink { [weak self] containerList in
+        thumbnailSelector.selectImageContainerSubject.sink { [weak self] containerList in
             containerList.enumerated().forEach { ele in
                 self?.imageViews[ele.offset].container = ele.element
             }
@@ -66,7 +66,7 @@ final class ThumbnailFourFrameView: UIStackView {
         for cardView in imageViews {
             cardView.action = { [weak self] container in
                 guard let self else { return }
-                vm.removeSelectImage(containerID: container.id)
+                thumbnailSelector.removeSelectImage(containerID: container.id)
             }
         }
     }

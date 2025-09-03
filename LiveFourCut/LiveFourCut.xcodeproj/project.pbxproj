@@ -50,6 +50,9 @@
 		63AC1A202E67411C0040A451 /* PhotoAuthorizationRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63AC1A1F2E67411C0040A451 /* PhotoAuthorizationRepository.swift */; };
 		63AC1A222E6742DD0040A451 /* CheckPhotoAuthUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63AC1A212E6742DD0040A451 /* CheckPhotoAuthUseCase.swift */; };
 		63AC1A242E6743360040A451 /* RequestPhotoAuthUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63AC1A232E6743360040A451 /* RequestPhotoAuthUseCase.swift */; };
+		63AC1A262E68167C0040A451 /* DenyPagePresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63AC1A252E68167C0040A451 /* DenyPagePresenter.swift */; };
+		63AC1A2A2E6819B10040A451 /* PhotoPickerEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63AC1A292E6819B10040A451 /* PhotoPickerEvent.swift */; };
+		63AC1A2C2E6819CF0040A451 /* VideoFetchEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63AC1A2B2E6819CF0040A451 /* VideoFetchEvent.swift */; };
 		63B68F7B2C35932A0047D610 /* FrameService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63B68F7A2C35932A0047D610 /* FrameService.swift */; };
 		63C9F9102C3598DB00451694 /* ThumbnailSelectorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63C9F90F2C3598DB00451694 /* ThumbnailSelectorView.swift */; };
 		63DB9D502C21ED9A0047DED0 /* PHAssetExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63DB9D4F2C21ED9A0047DED0 /* PHAssetExtensions.swift */; };
@@ -143,6 +146,9 @@
 		63AC1A1F2E67411C0040A451 /* PhotoAuthorizationRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoAuthorizationRepository.swift; sourceTree = "<group>"; };
 		63AC1A212E6742DD0040A451 /* CheckPhotoAuthUseCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckPhotoAuthUseCase.swift; sourceTree = "<group>"; };
 		63AC1A232E6743360040A451 /* RequestPhotoAuthUseCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RequestPhotoAuthUseCase.swift; sourceTree = "<group>"; };
+		63AC1A252E68167C0040A451 /* DenyPagePresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DenyPagePresenter.swift; sourceTree = "<group>"; };
+		63AC1A292E6819B10040A451 /* PhotoPickerEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoPickerEvent.swift; sourceTree = "<group>"; };
+		63AC1A2B2E6819CF0040A451 /* VideoFetchEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoFetchEvent.swift; sourceTree = "<group>"; };
 		63B68F7A2C35932A0047D610 /* FrameService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FrameService.swift; sourceTree = "<group>"; };
 		63C9F90F2C3598DB00451694 /* ThumbnailSelectorView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ThumbnailSelectorView.swift; sourceTree = "<group>"; };
 		63DB9D4F2C21ED9A0047DED0 /* PHAssetExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PHAssetExtensions.swift; sourceTree = "<group>"; };
@@ -192,17 +198,6 @@
 				08C1379B2C21811A0010AD75 /* Extensions */,
 			);
 			path = Helper;
-			sourceTree = "<group>";
-		};
-		08775DFB2C20210E008D8BA6 /* Views */ = {
-			isa = PBXGroup;
-			children = (
-				638F14D72C23DA5600CD3F2E /* 1. PhotoSelectionScene */,
-				638F14DA2C23DA8700CD3F2E /* 0. FrameSelectionScene */,
-				63AC045A2E66D54500714145 /* 3. SharingScene */,
-				63077A032C245BAB00C4017A /* 2. FourCutPreScene */,
-			);
-			path = Views;
 			sourceTree = "<group>";
 		};
 		08C137902C211D860010AD75 /* Frameworks */ = {
@@ -275,14 +270,6 @@
 			path = LiveFourCutUITests;
 			sourceTree = "<group>";
 		};
-		630779F82C24515900C4017A /* ViewModels */ = {
-			isa = PBXGroup;
-			children = (
-				630779F92C24516B00C4017A /* PhotoSelectionViewModel.swift */,
-			);
-			path = ViewModels;
-			sourceTree = "<group>";
-		};
 		630779FD2C24537200C4017A /* Models */ = {
 			isa = PBXGroup;
 			children = (
@@ -322,9 +309,12 @@
 		638F14D72C23DA5600CD3F2E /* 1. PhotoSelectionScene */ = {
 			isa = PBXGroup;
 			children = (
+				63AC1A282E68197A0040A451 /* VO */,
+				63AC1A272E6819730040A451 /* ViewModel */,
 				638F14DB2C23DAAF00CD3F2E /* ViewComponents */,
 				638F14D82C23DA7900CD3F2E /* PhotoSelectionViewController.swift */,
 				63AC046C2E66F8D900714145 /* PhotoSelectionView.swift */,
+				63AC1A252E68167C0040A451 /* DenyPagePresenter.swift */,
 			);
 			path = "1. PhotoSelectionScene";
 			sourceTree = "<group>";
@@ -408,8 +398,10 @@
 		63AC04602E66EA4700714145 /* Feature */ = {
 			isa = PBXGroup;
 			children = (
-				630779F82C24515900C4017A /* ViewModels */,
-				08775DFB2C20210E008D8BA6 /* Views */,
+				638F14DA2C23DA8700CD3F2E /* 0. FrameSelectionScene */,
+				638F14D72C23DA5600CD3F2E /* 1. PhotoSelectionScene */,
+				63AC045A2E66D54500714145 /* 3. SharingScene */,
+				63077A032C245BAB00C4017A /* 2. FourCutPreScene */,
 			);
 			path = Feature;
 			sourceTree = "<group>";
@@ -476,6 +468,23 @@
 				63AC1A1F2E67411C0040A451 /* PhotoAuthorizationRepository.swift */,
 			);
 			path = Repository;
+			sourceTree = "<group>";
+		};
+		63AC1A272E6819730040A451 /* ViewModel */ = {
+			isa = PBXGroup;
+			children = (
+				630779F92C24516B00C4017A /* PhotoSelectionViewModel.swift */,
+			);
+			path = ViewModel;
+			sourceTree = "<group>";
+		};
+		63AC1A282E68197A0040A451 /* VO */ = {
+			isa = PBXGroup;
+			children = (
+				63AC1A292E6819B10040A451 /* PhotoPickerEvent.swift */,
+				63AC1A2B2E6819CF0040A451 /* VideoFetchEvent.swift */,
+			);
+			path = VO;
 			sourceTree = "<group>";
 		};
 		63E30B012C38283300374372 /* Executors */ = {
@@ -658,6 +667,7 @@
 				63FC26212C357B74007C6703 /* ExtractService.swift in Sources */,
 				634ED9ED2D9696DD0044B200 /* UIViewExtensions.swift in Sources */,
 				63077A072C245C6900C4017A /* PreFourFrameView.swift in Sources */,
+				63AC1A2C2E6819CF0040A451 /* VideoFetchEvent.swift in Sources */,
 				630779FC2C24530A00C4017A /* UINavigationController+.swift in Sources */,
 				63077A052C245BD100C4017A /* FourCutPreViewController.swift in Sources */,
 				63AC04672E66EBDF00714145 /* FrameError.swift in Sources */,
@@ -672,6 +682,7 @@
 				63AC046F2E6715C300714145 /* FourCutPreView.swift in Sources */,
 				63AC046D2E66F8D900714145 /* PhotoSelectionView.swift in Sources */,
 				638F14E12C23DC1C00CD3F2E /* SelectDoneButton.swift in Sources */,
+				63AC1A2A2E6819B10040A451 /* PhotoPickerEvent.swift in Sources */,
 				63077A0E2C247D2200C4017A /* PreCardView.swift in Sources */,
 				63E30B0B2C38283300374372 /* ThumbnailExecutor.swift in Sources */,
 				63AC045C2E66D59400714145 /* Constants.swift in Sources */,
@@ -686,6 +697,7 @@
 				63AC1A202E67411C0040A451 /* PhotoAuthorizationRepository.swift in Sources */,
 				63AC1A132E6722C20040A451 /* CGImage+.swift in Sources */,
 				638F14E52C23DCE800CD3F2E /* ReselectButton.swift in Sources */,
+				63AC1A262E68167C0040A451 /* DenyPagePresenter.swift in Sources */,
 				63E30B122C38283300374372 /* LoadingVC.swift in Sources */,
 				63AC1A222E6742DD0040A451 /* CheckPhotoAuthUseCase.swift in Sources */,
 				63E30B0F2C38283300374372 /* BaseVC.swift in Sources */,

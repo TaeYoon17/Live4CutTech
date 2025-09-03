@@ -55,17 +55,17 @@ final class FrameSelectionViewController: UIViewController {
     // MARK: - Functions
     /// 프레임이 선택되었을 시 동작 함수
     private func frameStackViewTapped(frameType: FrameType) {
-        Task { await handlePhotoAuthorization() }
+        Task { await handlePhotoAuthorization(frameType: frameType) }
     }
     
     /// 사진 권한을 처리하는 메서드
-    private func handlePhotoAuthorization() async {
+    private func handlePhotoAuthorization(frameType: FrameType) async {
         let currentStatus = checkPhotoAuthUseCase.execute()
         switch currentStatus.actionType {
         case .proceed:
             await MainActor.run { [weak self] in
                 guard let self else { return }
-                goToSelectPhotos()
+                goToSelectPhotos(frameType: frameType)
             }
         case .requestPermission:
             let newStatus = await requestPhotoAuthUseCase.execute()
@@ -73,7 +73,7 @@ final class FrameSelectionViewController: UIViewController {
             case .proceed:
                 await MainActor.run { [weak self] in
                     guard let self else { return }
-                    goToSelectPhotos()
+                    goToSelectPhotos(frameType: frameType)
                 }
             default: await showAlert(for: newStatus)
             }
@@ -103,11 +103,9 @@ final class FrameSelectionViewController: UIViewController {
         }
     }
     
-    private func goToSelectPhotos() {
-        let frameCount = Constants.frameCount
+    private func goToSelectPhotos(frameType: FrameType) {
         let photoSelectionViewController = PhotoSelectionViewController(
-            viewModel: ThumbnailSelectorVM(),
-            frameCount: frameCount
+            viewModel: PhotoSelectionViewModel(frameType: frameType)
         )
         navigationController?.pushViewController(
             photoSelectionViewController,

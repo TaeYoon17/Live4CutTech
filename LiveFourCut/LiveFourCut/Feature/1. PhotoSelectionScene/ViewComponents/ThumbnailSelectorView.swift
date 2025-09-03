@@ -8,60 +8,77 @@
 import UIKit
 import Combine
 
-    final class ThumbnailSelectorView: UIStackView {
+final class ThumbnailSelectorView: UIStackView {
+    
+    private var imageContainers: [ImageContainer] = []
+    private lazy var imageViews: [ThumnailItem] = (0..<4).map { _ in ThumnailItem() }
+    
+    private weak var thumbnailSelector: ThumbnailSelectorProtocol!
+    private var cancellable = Set<AnyCancellable>()
+    
+    init(thumbnailSelector: ThumbnailSelectorProtocol) {
+        self.thumbnailSelector = thumbnailSelector
+        super.init(frame: .zero)
         
-        var imageContainers: [ImageContainer] = [] {
-            didSet {
-                guard imageContainers.count == 4 else { return }
-                imageViews.enumerated().forEach {
-                    $0.element.imageContainer = imageContainers[$0.offset]
-                }
-            }
+        configureLayout()
+        configureConstraints()
+        configureView()
+    }
+    
+    required init(coder: NSCoder) {
+        fatalError("Don't use storyboard")
+    }
+    
+    
+    private func configureLayout() {
+        imageViews.forEach { item in
+            self.addArrangedSubview(item)
         }
-        
-        lazy var imageViews: [ThumnailItem] = (0..<4).map{ _ in ThumnailItem() }
-        var identifiers: [String] = []
-        
-        private weak var vm: ThumbnailSelectorVM!
-        
-        var cancellable = Set<AnyCancellable>()
-        
-        init(viewModel: ThumbnailSelectorVM) {
-            super.init(frame: .zero)
-            self.vm = viewModel
-            imageViews.forEach { $0.vm = vm }
-            vm.selectedImageIndexes.sink { [weak self] selectedList in
-                self?.imageViews.enumerated().forEach { ele in
-                    ele.element.setSelect(selectedList[ele.offset])
-                }
-            }.store(in: &cancellable)
-            self.distribution = .fillEqually
-            self.alignment = .fill
-            self.axis = .horizontal
-            self.spacing = 10
-            imageViews.forEach{ item in
-                self.addArrangedSubview(item)
-                item.clipsToBounds = true
-                item.snp.makeConstraints { make in
-                    make.height.equalTo(item.snp.width).multipliedBy(1.3333)
-                }
-            }
-        }
-        required init(coder: NSCoder) {
-            fatalError("Don't use storyboard")
-        }
-        
-        func reset() {
-            imageViews.forEach { item in
-                item.imageContainer = nil
-                item.setSelect(false)
+    }
+    
+    private func configureConstraints() {
+        self.distribution = .fillEqually
+        self.alignment = .fill
+        self.axis = .horizontal
+        self.spacing = 10
+        imageViews.forEach { item in
+            item.clipsToBounds = true
+            item.snp.makeConstraints { make in
+                make.height.equalTo(item.snp.width).multipliedBy(1.3333)
             }
         }
     }
+    
+    private func configureView() {
+        imageViews.forEach { $0.thumbnailSelector = thumbnailSelector }
+        thumbnailSelector.selectedImageIndexes.sink { [weak self] selectedList in
+            guard let self else { return }
+            imageViews.enumerated().forEach { ele in
+                ele.element.setSelect(selectedList[ele.offset])
+            }
+        }.store(in: &cancellable)
+    }
+    
+    
+    func reset() {
+        imageViews.forEach { item in
+            item.imageContainer = nil
+            item.setSelect(false)
+        }
+    }
+    
+    func setImageContainers(imageContainers: [ImageContainer]) {
+        self.imageContainers = imageContainers
+        guard imageContainers.count == 4 else { return }
+        imageViews.enumerated().forEach {
+            $0.element.imageContainer = imageContainers[$0.offset]
+        }
+    }
+}
 
 extension ThumbnailSelectorView {
     final class ThumnailItem: UIView {
-        weak var vm:ThumbnailSelectorVM!
+        weak var thumbnailSelector: ThumbnailSelectorProtocol!
         var imageContainer: ImageContainer! {
             didSet {
                 guard let imageContainer else {
@@ -113,10 +130,10 @@ extension ThumbnailSelectorView {
         }
         @objc func itemTapped(sender: UITapGestureRecognizer) {
             if isSelected {
-                vm.removeSelectImage(containerID: imageContainer.id)
+                thumbnailSelector.removeSelectImage(containerID: imageContainer.id)
                 self.isSelected = false
             } else {
-                let frameIdx = vm.appendSelectImage(container: imageContainer)
+                let frameIdx = thumbnailSelector.appendSelectImage(container: imageContainer)
                 self.labelText = "\(frameIdx + 1)"
                 self.label.text = self.labelText
                 self.isSelected = true

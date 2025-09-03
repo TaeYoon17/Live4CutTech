@@ -9,4 +9,10 @@ import Foundation
 
 enum FrameType {
     case basic2x2
+    
+    var frameCount: Int {
+        switch self {
+        case .basic2x2: return 4
+        }
+    }
 }

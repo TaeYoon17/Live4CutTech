@@ -8,44 +8,40 @@
 import UIKit
 import Combine
 
+enum PhotoSelectionEvent {
+    case navigationBack
+    case selectDone
+    case openPicker
+}
+
 final class PhotoSelectionView: UIView {
+    let eventPublisher = PassthroughSubject<PhotoSelectionEvent, Never>()
     
-    enum Event {
-        case navigationBack
-        case selectDone
-        case openPicker
-    }
-    
-    let eventPublisher = PassthroughSubject<Event, Never>()
-    
-    private weak var viewModel: ThumbnailSelectorVM!
+    private weak var thumbnailSelector: ThumbnailSelectorProtocol!
     //MARK: -- View 저장 프로퍼티
-    lazy var thumbnailFrameView = ThumbnailFourFrameView(viewModel: viewModel)
-    lazy var thumbnailSelectorView = ThumbnailSelectorView(viewModel: viewModel)
+    private lazy var thumbnailFrameView = ThumbnailFourFrameView(thumbnailSelector: thumbnailSelector)
+    private lazy var thumbnailSelectorView = ThumbnailSelectorView(thumbnailSelector: thumbnailSelector)
+    private lazy var selectDoneBtn = DoneBtn(title: "\(thumbnailSelector.frameType.frameCount)컷 영상 미리보기")
+    private let progress = UIProgressView(progressViewStyle: .bar)
+    private let reSelectPhotoBtn = ReSelectPhotoBtn()
+    private let navigationBackButton = NavigationBackButton()
     
-    let selectDoneBtn = DoneBtn(title: "4컷 영상 미리보기")
-    let pregress = UIProgressView(progressViewStyle: .bar)
-    let reSelectPhotoBtn = ReSelectPhotoBtn()
-    let navigationBackButton = NavigationBackButton()
-    
-    let titleLabel: UILabel = {
+    private let titleLabel: UILabel = {
         var label = UILabel()
         label.text = "이미지 선택"
         label.font = .systemFont(ofSize: 30, weight: .bold)
         return label
     }()
-    
-    let descLabel: UILabel = {
+    private let descLabel: UILabel = {
         let label = UILabel()
         label.text = "라이브로 찍은 이미지를 골라주세요!"
         label.font = .systemFont(ofSize: 18,weight: .regular)
         return label
     }()
-    
     private let bottomView: UIView = .init()
     
-    init(viewModel: ThumbnailSelectorVM!) {
-        self.viewModel = viewModel
+    init(thumbnailSelector: ThumbnailSelectorProtocol) {
+        self.thumbnailSelector = thumbnailSelector
         super.init(frame: .zero)
         configureLayout()
         configureConstraints()
@@ -56,15 +52,52 @@ final class PhotoSelectionView: UIView {
         fatalError("init(coder:) has not been implemented")
     }
     
-    func configureLayout() {
+    // MARK: - Public Methods
+    @MainActor
+    func updateImageContainers(imageContainers: [ImageContainer]) {
+        self.thumbnailSelectorView.setImageContainers(imageContainers: imageContainers)
+    }
+    
+    @MainActor
+    func updateFetchProgress(_ progressNumber: Float) {
+        UIView.animate(withDuration: 0.2) {
+            if !self.progress.isHidden && progressNumber == 1 {
+                self.progress.isHidden = true
+            } else if self.progress.isHidden && progressNumber != 1 {
+                self.progress.isHidden = false
+            }
+            self.progress.progress = progressNumber
+        }
+    }
+    
+    @MainActor
+    func updateSelectionCompletionState(_ isPrintSelectionCompleted: Bool) {
+        selectDoneBtn.isHidden = !isPrintSelectionCompleted
+        thumbnailSelectorView.isHidden = isPrintSelectionCompleted
+        reSelectPhotoBtn.isHidden = !isPrintSelectionCompleted
+    }
+    
+    @MainActor
+    func resetToImageProcessingState() {
+        selectDoneBtn.isHidden = true
+        reSelectPhotoBtn.isHidden = true
+        progress.isHidden = false
+        thumbnailSelectorView.isHidden = false
+        thumbnailSelectorView.reset()
+        thumbnailFrameView.reset()
+    }
+}
+extension PhotoSelectionView {
+
+    private func configureLayout() {
         self.addSubview(navigationBackButton)
         [titleLabel, descLabel, thumbnailFrameView, bottomView].forEach { self.addSubview($0) }
-        [thumbnailSelectorView, selectDoneBtn, pregress, reSelectPhotoBtn].forEach {
+        [thumbnailSelectorView, selectDoneBtn, progress, reSelectPhotoBtn].forEach {
             bottomView.addSubview($0)
         }
     }
     
-    func configureConstraints() {
+    private func configureConstraints() {
         titleLabel.snp.makeConstraints { make in
             make.top.equalTo(safeAreaLayoutGuide).offset(8)
             make.centerX.equalToSuperview()
@@ -92,7 +125,7 @@ final class PhotoSelectionView: UIView {
             make.height.equalTo(50)
             make.horizontalEdges.equalToSuperview().inset(24)
         }
-        pregress.snp.makeConstraints { make in
+        progress.snp.makeConstraints { make in
             make.centerY.equalToSuperview()
             make.height.equalTo(2)
             make.horizontalEdges.equalToSuperview().inset(24)
@@ -107,11 +140,11 @@ final class PhotoSelectionView: UIView {
         }
     }
     
-    func configureView() {
+    private func configureView() {
         self.backgroundColor = .systemBackground
-        pregress.backgroundColor = .lightGray
-        pregress.tintColor = .black
-        pregress.isHidden = true
+        progress.backgroundColor = .lightGray
+        progress.tintColor = .black
+        progress.isHidden = true
         self.navigationBackButton.action = { [weak self] in
             guard let self else { return }
             eventPublisher.send(.navigationBack)

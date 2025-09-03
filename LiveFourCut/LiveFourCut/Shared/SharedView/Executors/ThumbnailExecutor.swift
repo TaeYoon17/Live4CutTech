@@ -10,24 +10,33 @@ import Combine
 import Photos
 import UIKit
 
-actor ThumbnailExecutor {
-    let thumbnailsSubject: PassthroughSubject<[ImageContainer],Never> = .init()
-    let progressSubject: PassthroughSubject<Float,Never> = .init()
+
+protocol ThumbnailExecutorProtocol {
+    var itemsSubject: PassthroughSubject<[ImageContainer], Never> { get }
+    var progressSubject: PassthroughSubject<Float, Never>  { get }
+    func setFetchResult(result: PHFetchResult<PHAsset>) async
+    func run() async
+}
+
+final class ThumbnailExecutor: ThumbnailExecutorProtocol {
+    let itemsSubject: PassthroughSubject<[ImageContainer], Never> = .init()
+    let progressSubject: PassthroughSubject<Float, Never> = .init()
+    
     private var result: PHFetchResult<PHAsset>!
     private let imageManager: PHCachingImageManager = .init()
     
     private var counter: Int = -1 {
-        didSet{
-            guard counter == 0 else {return}
-            thumbnailsSubject.send(fetchItems)
+        didSet {
+            guard counter == 0 else { return }
+            itemsSubject.send(fetchItems)
             fetchItems.removeAll()
             fetchAssets.removeAll()
         }
     }
     
-    private var fetchItems:[ImageContainer] = []
+    private var fetchItems: [ImageContainer] = []
     
-    private var fetchAssets:[PHAsset] = [] {
+    private var fetchAssets: [PHAsset] = [] {
         didSet {
             guard counter == fetchAssets.count else { return }
             Task {
@@ -38,7 +47,13 @@ actor ThumbnailExecutor {
                         size: .init(width: 3 * 120, height: 3 * 120 * 1.77),
                         contentMode: .aspectFill) { image in
                         let count = self.fetchItems.count
-                        self.fetchItems.append(ImageContainer(id: asset.localIdentifier, image: image, idx: count))
+                            self.fetchItems.append(
+                                ImageContainer(
+                                    id: asset.localIdentifier,
+                                    image: image,
+                                    idx: count
+                                )
+                            )
                         self.counter -= 1
                         self.progressSubject.send(min(1,(Float(resultCount - self.counter) / Float(resultCount))))
                     }
@@ -68,7 +83,7 @@ actor ThumbnailExecutor {
         completion: @escaping (UIImage) -> Void
     ) {
         let options = PHImageRequestOptions()
-        options.isNetworkAccessAllowed = true // iCloud
+        options.isNetworkAccessAllowed = true // iCloud의 이미지도 가져올 수 있음
         options.deliveryMode = .highQualityFormat
         imageManager.requestImage(
             for: phAsset,
@@ -82,5 +97,4 @@ actor ThumbnailExecutor {
         )
     }
 }
-
 

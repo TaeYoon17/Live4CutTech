@@ -13,17 +13,25 @@ import UIKit
 enum VideoExecutorErrors: Error, Sendable {
     case failedSavedTempDirectory
     case fetchFailed
-    
 }
-actor VideoExecutor {
-    let videosSubject: PassthroughSubject<[AVAssetContainer],Never> = .init()
-    let progressSubject:PassthroughSubject<Float,Never> = .init()
-    private(set) var minDuration:Float = 1000
+protocol VideoExecutorProtocol {
+    var itemsSubject: PassthroughSubject<[AVAssetContainer], Never> { get }
+    var minDuration: Float { get }
+    var progressSubject: PassthroughSubject<Float, Never>  { get }
+    func setFetchResult(result: PHFetchResult<PHAsset>) async
+    func run() async
+}
+
+final class VideoExecutor: VideoExecutorProtocol {
+    let itemsSubject: PassthroughSubject<[AVAssetContainer], Never> = .init()
+    let progressSubject: PassthroughSubject<Float,Never> = .init()
+    
+    private(set) var minDuration: Float = 1000
     private let videoManager: PHCachingImageManager = .init()
     private var result: PHFetchResult<PHAsset>!
     
     private var counter: Int = -1 {
-        didSet{
+        didSet {
             guard counter == 0 else { return }
             counter = -1
             Task {
@@ -35,7 +43,7 @@ actor VideoExecutor {
     private var fetchItems:[AVAssetContainer] = []
     private var fetchAssets: [PHAssetResource] = [] {
         didSet {
-            guard counter == fetchAssets.count else {return}
+            guard counter == fetchAssets.count else { return }
             let resultCount = fetchAssets.count
             
                 for (idx,file) in fetchAssets.enumerated() {
@@ -48,7 +56,7 @@ actor VideoExecutor {
                     let option = PHAssetResourceRequestOptions()
                     option.isNetworkAccessAllowed = true
                     
-                    Task{
+                    Task {
                         try await PHAssetResourceManager.default().writeData(for: file, toFile: fileURL, options: option)
                         let urlAsset = AVURLAsset(url: fileURL)
                         let value:Float = (try? await Float(urlAsset.load(.duration).value)) ?? 1 // 여기 에러 처리 필요함
@@ -77,21 +85,28 @@ actor VideoExecutor {
         self.progressSubject.send(0)
         
         result.enumerateObjects(options:.concurrent) { asset, idx, _ in
-            let files = PHAssetResource.assetResources(for: asset).filter({$0.originalFilename.contains(".MOV")})
+            let files = PHAssetResource.assetResources(for: asset).filter { $0.originalFilename.contains(".MOV") }
             guard let file = files.first else { return }
             self.fetchAssets.append(file)
         }
     }
     private func exportConvertedAssetContainers() async throws {
-        var newAVssetContainers:[AVAssetContainer] = []
+        var newAVssetContainers: [AVAssetContainer] = []
         let resultCount = fetchItems.count
         for (idx,item) in fetchItems.enumerated() {
-            newAVssetContainers.append(AVAssetContainer(id: item.id, idx: item.idx, minDuration: self.minDuration, originalAssetURL: item.originalAssetURL))
+            newAVssetContainers.append(
+                AVAssetContainer(
+                    id: item.id,
+                    idx: item.idx,
+                    minDuration: self.minDuration,
+                    originalAssetURL: item.originalAssetURL
+                )
+            )
             self.progressSubject.send(min(1,Float(idx) / Float(resultCount * 2) + 0.5))
         }
         self.fetchItems.removeAll()
         self.fetchAssets.removeAll()
-        self.videosSubject.send(newAVssetContainers)
+        self.itemsSubject.send(newAVssetContainers)
     }
     
 }
@@ -120,7 +135,7 @@ extension VideoExecutor {
         } else {
             await exportSession.export()
             switch exportSession.status {
-            case .cancelled,.completed: break
+            case .cancelled, .completed: break
             case .unknown, .waiting, .exporting, .failed: throw VideoExecutorErrors.failedSavedTempDirectory
             @unknown default: throw VideoExecutorErrors.failedSavedTempDirectory
             }
@@ -129,8 +144,8 @@ extension VideoExecutor {
     }
 }
 
-extension FileManager{
-    func tempFileExist(fileName:String) async throws-> Bool{
+extension FileManager {
+    func tempFileExist(fileName: String) async throws -> Bool {
         let newFileURL = self.temporaryDirectory.appendingPathComponent(fileName)
         return self.fileExists(atPath: newFileURL.absoluteString)
     }

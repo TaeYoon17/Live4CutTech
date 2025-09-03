@@ -44,7 +44,7 @@ class LoadingVC: BaseVC {
         
     }
     
-    func dismissLoadingAlert(completion:@escaping ()->()){
+    func dismissLoadingAlert(completion: @escaping () -> ()){
         loadingAlertView?.dismiss(animated: true){
             self.loadingProgressView = nil
             self.loadingAlertView = nil
