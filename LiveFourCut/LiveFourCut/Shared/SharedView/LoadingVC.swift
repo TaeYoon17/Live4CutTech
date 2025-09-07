@@ -34,7 +34,7 @@ class LoadingVC: BaseVC {
         
         present(alertView, animated: true, completion: {
             //  Add your progressbar after alert is shown (and measured)
-            let margin:CGFloat = 8.0
+            let margin: CGFloat = 8.0
             let rect = CGRect(x: margin, y: 72.0, width: alertView.view.frame.width - margin * 2.0 , height: 2.0)
             self.loadingProgressView = UIProgressView(frame: rect)
             self.loadingProgressView?.progress = 0.0

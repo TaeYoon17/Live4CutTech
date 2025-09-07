@@ -17,9 +17,11 @@ final class FourCutPreView: UIView {
     
     let eventPublisher = PassthroughSubject<Event, Never>()
     
-    let preFourFrameView = PreFourFrameView()
+    private let preFourFrameView = Pre2x2FrameView()
     private let navigationBackButton = NavigationBackButton()
+    
     private let bottomFrameView = UIView()
+    
     private let titleLabel: UILabel = {
         let label = UILabel()
         label.text = "이미지 선택"
@@ -36,7 +38,6 @@ final class FourCutPreView: UIView {
     
     private let shareBtn = DoneBtn(title: "4컷 영상 추출하러가기")
     
-    
     init() {
         super.init(frame: .zero)
         self.backgroundColor = .systemBackground
@@ -44,17 +45,30 @@ final class FourCutPreView: UIView {
         configureConstraints()
         configureView()
     }
+    
     required init?(coder: NSCoder) {
         fatalError("Don't use storyboard")
     }
     
-    func configureLayout() {
+    func setUpPreView(minDuration: Double, avAssetContainers: [AVAssetContainer]) {
+        self.preFourFrameView.minDuration = minDuration
+        self.preFourFrameView.containers = avAssetContainers
+    }
+    
+    func playPreView() {
+        self.preFourFrameView.play()
+    }
+}
+
+fileprivate extension FourCutPreView {
+    
+    private func configureLayout() {
         self.addSubview(navigationBackButton)
         [titleLabel, descLabel, preFourFrameView, bottomFrameView].forEach { self.addSubview($0) }
         bottomFrameView.addSubview(shareBtn)
     }
     
-    func configureConstraints() {
+    private func configureConstraints() {
        titleLabel.snp.makeConstraints { make in
            make.top.equalTo(safeAreaLayoutGuide).offset(8)
            make.centerX.equalToSuperview()
@@ -84,7 +98,7 @@ final class FourCutPreView: UIView {
         }
    }
     
-    func configureView() {
+    private func configureView() {
         navigationBackButton.action = { [weak self] in
             guard let self else { return }
             eventPublisher.send(.navigationBack)

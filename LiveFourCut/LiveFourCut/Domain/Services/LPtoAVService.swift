@@ -14,7 +14,7 @@ enum LPtoAVError: Error { }
 
 protocol LPtoAVServiceProtocol { }
 actor LPtoAVService: NSObject {
-    private var originURLAssets:[(String,AVURLAsset)] = []
+    private var originURLAssets: [(String,AVURLAsset)] = []
     private var assetCounter:Int = -1{
         didSet{
             guard assetCounter == 0 else {return}

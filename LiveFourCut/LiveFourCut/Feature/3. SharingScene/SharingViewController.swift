@@ -71,6 +71,7 @@ final class SharingViewController: BaseVC {
         guard let videoURL else { return }
         let playerLayer = AVPlayerLayer(player: queuePlayer)
         let playerItem = AVPlayerItem(url: videoURL)
+        
         self.queuePlayer.replaceCurrentItem(with: playerItem)
         self.queuePlayer.isMuted = true
         self.queuePlayer.items()

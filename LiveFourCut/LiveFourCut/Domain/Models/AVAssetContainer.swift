@@ -7,8 +7,8 @@
 
 import Foundation
 
-struct AVAssetContainer: Identifiable {
-    var id: String
+struct AVAssetContainer: Identifiable, Equatable {
+    var id: String // 여기 UUID로 바꿀 순 없나?
     let idx: Int
     let minDuration: Float
     let originalAssetURL: String

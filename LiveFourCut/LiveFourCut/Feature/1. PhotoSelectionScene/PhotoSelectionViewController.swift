@@ -11,7 +11,6 @@ import Combine
 import Photos
 import PhotosUI
 
-
 final class PhotoSelectionViewController: LoadingVC {
     //MARK: -- View 저장 프로퍼티
     private let viewModel: PhotoSelectionViewModel
@@ -79,6 +78,7 @@ final class PhotoSelectionViewController: LoadingVC {
                 guard let self else {return}
                 contentView.updateFetchProgress(progressNumber)
             }.store(in: &cancellable)
+        
         viewModel.isPrintSelectionCompleted
             .receive(on: RunLoop.main)
             .sink { [weak self] isPrintSelectionCompleted in
@@ -93,17 +93,22 @@ final class PhotoSelectionViewController: LoadingVC {
                 loadingProgressView?.progress = progress
             }.store(in: &cancellable)
         
-        
-        
         viewModel.videoAssetContinersSubject
             .receive(on: RunLoop.main)
             .sink { [weak self] (container, minDuration) in
                 guard let self else { return }
                 dismissLoadingAlert { [weak self] in
                     guard let self else { return }
-                    let vc = FourCutPreViewController()
-                    vc.avAssetContainers = container
-                    vc.minDuration = minDuration
+                    let vc = FourCutPreViewController(
+                        minDuration: Double(minDuration),
+                        frameType: viewModel.frameType,
+                        extractService: ExtractService(),
+                        videoMaker: VideoMaker(
+                            memoryWarningService: MemoryWarningActor(),
+                            frameService: Frame2x2Generator(width: 480)
+                        ), // 여기 값 전달이 좀 아쉽다...
+                        avAssetContainers: container
+                    )
                     navigationController?.pushViewController(vc, animated: true)
                 }
             }.store(in: &cancellable)
@@ -146,10 +151,9 @@ final class PhotoSelectionViewController: LoadingVC {
             }.store(in: &cancellable)
     }
 }
+
 extension PhotoSelectionViewController: PHPickerViewControllerDelegate {
-    
     func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
         viewModel.handlePickerResults(results: results)
     }
-    
 }

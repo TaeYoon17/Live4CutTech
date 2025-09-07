@@ -40,7 +40,8 @@ final class VideoExecutor: VideoExecutorProtocol {
         }
     }
     
-    private var fetchItems:[AVAssetContainer] = []
+    private var fetchItems: [AVAssetContainer] = []
+    
     private var fetchAssets: [PHAssetResource] = [] {
         didSet {
             guard counter == fetchAssets.count else { return }
@@ -57,16 +58,25 @@ final class VideoExecutor: VideoExecutorProtocol {
                     option.isNetworkAccessAllowed = true
                     
                     Task {
-                        try await PHAssetResourceManager.default().writeData(for: file, toFile: fileURL, options: option)
+                        try await PHAssetResourceManager.default().writeData(
+                            for: file,
+                            toFile: fileURL,
+                            options: option
+                        )
                         let urlAsset = AVURLAsset(url: fileURL)
-                        let value:Float = (try? await Float(urlAsset.load(.duration).value)) ?? 1 // 여기 에러 처리 필요함
+                        let value: Float = (try? await Float(urlAsset.load(.duration).value)) ?? 1 // 여기 에러 처리 필요함
                         let timeScale: Float = (try? await Float(urlAsset.load(.duration).timescale)) ?? 1 // 여기 에러 처리 필요함
                         let secondsLength = value / timeScale
-                        self.minDuration = min(secondsLength,self.minDuration)
+                        self.minDuration = min(secondsLength, self.minDuration)
                         let cnt = self.fetchItems.count
-                        self.fetchItems.append(AVAssetContainer(id: file.assetLocalIdentifier,
-                                                            idx: cnt, minDuration: 1000,
-                                                            originalAssetURL: fileURL.absoluteString))
+                        self.fetchItems.append(
+                            AVAssetContainer(
+                                id: file.assetLocalIdentifier,
+                                idx: cnt,
+                                minDuration: 1000,
+                                originalAssetURL: fileURL.absoluteString
+                            )
+                        )
                     
                         self.counter -= 1
                         self.progressSubject.send(min(1, Float(resultCount - self.counter) / Float(2 * resultCount)))
@@ -84,6 +94,7 @@ final class VideoExecutor: VideoExecutorProtocol {
         self.minDuration = 1000
         self.progressSubject.send(0)
         
+        // 여기 락 처리를 안했는데 괜찮을까?
         result.enumerateObjects(options:.concurrent) { asset, idx, _ in
             let files = PHAssetResource.assetResources(for: asset).filter { $0.originalFilename.contains(".MOV") }
             guard let file = files.first else { return }
@@ -93,7 +104,7 @@ final class VideoExecutor: VideoExecutorProtocol {
     private func exportConvertedAssetContainers() async throws {
         var newAVssetContainers: [AVAssetContainer] = []
         let resultCount = fetchItems.count
-        for (idx,item) in fetchItems.enumerated() {
+        for (idx, item) in fetchItems.enumerated() {
             newAVssetContainers.append(
                 AVAssetContainer(
                     id: item.id,
@@ -102,7 +113,7 @@ final class VideoExecutor: VideoExecutorProtocol {
                     originalAssetURL: item.originalAssetURL
                 )
             )
-            self.progressSubject.send(min(1,Float(idx) / Float(resultCount * 2) + 0.5))
+            self.progressSubject.send(min(1, Float(idx) / Float(resultCount * 2) + 0.5))
         }
         self.fetchItems.removeAll()
         self.fetchAssets.removeAll()
@@ -112,15 +123,17 @@ final class VideoExecutor: VideoExecutorProtocol {
 }
 
 extension VideoExecutor {
-    nonisolated fileprivate func moveAssetDirToTempDir(urlAsset: inout AVURLAsset) async throws -> URL{
+    fileprivate func moveAssetDirToTempDir(urlAsset: inout AVURLAsset) async throws -> URL{
         let lastComponent = urlAsset.url.lastPathComponent
         let tempFileURL = FileManager().temporaryDirectory.appendingPathComponent(lastComponent)
         if FileManager.default.fileExists(atPath: tempFileURL.path()) {
             try? FileManager.default.removeItem(at: tempFileURL)
         }
         
-        guard let exportSession = AVAssetExportSession(asset: urlAsset,
-                                                       presetName: AVAssetExportPresetHighestQuality) else {
+        guard let exportSession = AVAssetExportSession(
+            asset: urlAsset,
+            presetName: AVAssetExportPresetHighestQuality
+        ) else {
             throw VideoExecutorErrors.failedSavedTempDirectory
         }
         

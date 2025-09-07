@@ -8,5 +8,6 @@
 import Foundation
 
 enum Constants {
-    static let frameCount = 4 // 이미지 프레임 계수
+    static let defaultMinDurationSeconds: Float = 1000
+    static let preferredTimescale: Int = 24
 }

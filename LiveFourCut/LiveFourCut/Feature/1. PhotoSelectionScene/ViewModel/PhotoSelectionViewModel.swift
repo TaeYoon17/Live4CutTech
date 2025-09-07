@@ -60,12 +60,14 @@ final class PhotoSelectionViewModel: ThumbnailSelectorProtocol {
     // MARK: - Subjects
     let selectImageContainerSubject: CurrentValueSubject<[ImageContainer?],Never>
     var selectedImageIndexes: AnyPublisher<[Bool], Never> {
-        selectImageContainerSubject.map { containerList in
-            (0..<Constants.frameCount).map {
+        let frameCount = frameType.frameCount
+        return selectImageContainerSubject.map { containerList in
+            return (0..<frameCount).map {
                 containerList.map(\.?.idx).contains($0)
             }
         }.eraseToAnyPublisher()
     }
+    
     // 유저가 출력할 이미지들의 순서 선택을 완료했는지
     var isPrintSelectionCompleted: AnyPublisher<Bool, Never> {
         selectImageContainerSubject.map{ !$0.contains(where: {$0 == nil} ) }.eraseToAnyPublisher()
@@ -141,7 +143,15 @@ fileprivate extension PhotoSelectionViewModel {
         videoExecutor.itemsSubject
             .sink { [weak self] videos in
                 guard let self else { return }
-                videoAssetContinersSubject.send((videos, videoExecutor.minDuration))
+                let images = self.selectImageContainerSubject.value.compactMap { $0 }
+                var result: [AVAssetContainer] = []
+                for image in images {
+                    if let video = videos.first(where: { $0.id == image.id }) {
+                        result.append(video)
+                    }
+                }
+                
+                videoAssetContinersSubject.send((result, videoExecutor.minDuration))
             }.store(in: &cancellables)
         
     }

@@ -9,7 +9,7 @@ import UIKit
 import Combine
 
 
-final class PreFourFrameView: UIStackView {
+final class Pre2x2FrameView: UIStackView {
     var containers: [AVAssetContainer]! {
         didSet {
             guard let containers, containers.count == 4 else { return }
@@ -19,17 +19,19 @@ final class PreFourFrameView: UIStackView {
         }
     }
     
-    var minDuration: Float! {
+    var minDuration: Double! {
         didSet {
             guard let minDuration else { return }
-            imageViews.forEach { $0.minDuration = minDuration }
+            print("불리는 minDuration: ", minDuration)
+            imageViews.forEach { $0.minDuration = Float(minDuration) }
         }
     }
+    
     private var imageViews: [PreCardView] = (0..<4).map { _ in PreCardView() }
     private let frameSpacing: CGFloat = 4
     
     private lazy var upperStack = {
-        let subViews = [imageViews[0],imageViews[1]]
+        let subViews = [imageViews[0], imageViews[1]]
         let stView = UIStackView(arrangedSubviews: subViews)
         stView.axis = .horizontal
         stView.alignment = .fill
@@ -39,7 +41,7 @@ final class PreFourFrameView: UIStackView {
     }()
     
     private lazy var lowerStack = {
-        let subViews = [imageViews[2],imageViews[3]]
+        let subViews = [imageViews[2], imageViews[3]]
         let stView = UIStackView(arrangedSubviews: subViews)
         stView.axis = .horizontal
         stView.distribution = .fillEqually

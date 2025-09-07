@@ -11,7 +11,10 @@ import Combine
 final class ThumbnailFourFrameView: UIStackView {
     private weak var thumbnailSelector: ThumbnailSelectorProtocol!
     
-    var selector: [Bool] = Array(repeating: false, count: Constants.frameCount)
+    private lazy var selector: [Bool] = Array(
+        repeating: false,
+        count: thumbnailSelector.frameType.frameCount
+    )
     
     private let frameSpacing: CGFloat = 4
     private var imageViews: [ThumbnailCardView] = (0..<4).map{ThumbnailCardView(image: nil, number: $0 + 1)}
