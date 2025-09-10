@@ -18,7 +18,10 @@ final class ExtractService {
     
     init() { }
     
-    func setUp(minDuration: Double, avAssetContainers: [AVAssetContainer]) {
+    func setUp(
+        minDuration: Double,
+        avAssetContainers: [AVAssetContainer]
+    ) {
         self.minDuration = minDuration
         self.avAssetContainers = avAssetContainers
     }
@@ -27,7 +30,7 @@ final class ExtractService {
         guard !avAssetContainers.isEmpty else { throw ExtractError.emptyContainer }
         let imageDatas: [[CGImage]] = try await withThrowingTaskGroup(of: (Int, [CGImage]).self) { taskGroup in
             for (offset,v) in avAssetContainers.enumerated() {
-                taskGroup.addTask { [self, minDuration,fps] in
+                taskGroup.addTask { [self, minDuration, fps] in
                     let asset = AVAsset(url: URL(string: v.originalAssetURL)!)
                     let generator = AVAssetImageGenerator(asset: asset)
                     generator.appliesPreferredTrackTransform = true
@@ -35,6 +38,7 @@ final class ExtractService {
                     generator.requestedTimeToleranceAfter = .init(seconds: Double(1 / (fps * 2)), preferredTimescale: 600)
                     var imageDatas: [CGImage] = []
                     var lastImage: CGImage!
+                    
                     let time = CMTime(seconds: 0, preferredTimescale: 600)
                     let imgContain = try await generator.image(at: time)
                     let downImage = self.downsampleVImage(image: imgContain.image)
@@ -72,7 +76,7 @@ extension ExtractService {
     func downSample(image: CGImage) -> CGImage {
         
         let ciImage = CIImage(cgImage: image)
-        let targetWidth : CGFloat = 360
+        let targetWidth : CGFloat = 480
         let scale = targetWidth / ciImage.extent.width
         let targetHeight = ciImage.extent.height * scale
         let scaleSize = CGSize(width: targetWidth, height: targetHeight)
