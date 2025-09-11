@@ -14,112 +14,97 @@ enum VideoExecutorErrors: Error, Sendable {
     case failedSavedTempDirectory
     case fetchFailed
 }
-protocol VideoExecutorProtocol {
-    var itemsSubject: PassthroughSubject<[AVAssetContainer], Never> { get }
-    var minDuration: Float { get }
-    var progressSubject: PassthroughSubject<Float, Never>  { get }
+
+struct VideoFetchDTO {
+    let minDuration: Float
+    let items: [AVAssetContainer]
+}
+
+enum VideoExecutorState {
+    case running(Float)
+    case finished(VideoFetchDTO)
+}
+
+protocol VideoExecutorProtocol: AnyObject, Sendable {
+    var executeStream: AsyncThrowingStream<VideoExecutorState, Error> { get async }
     func setFetchResult(result: PHFetchResult<PHAsset>) async
     func run() async
 }
 
-final class VideoExecutor: VideoExecutorProtocol {
-    let itemsSubject: PassthroughSubject<[AVAssetContainer], Never> = .init()
-    let progressSubject: PassthroughSubject<Float,Never> = .init()
+actor VideoExecutor: VideoExecutorProtocol {
     
-    private(set) var minDuration: Float = 1000
+    let executeStream: AsyncThrowingStream<VideoExecutorState, any Error>
+    private let continuation:  AsyncThrowingStream<VideoExecutorState, any Error>.Continuation
+    
     private let videoManager: PHCachingImageManager = .init()
     private var result: PHFetchResult<PHAsset>!
     
-    private var counter: Int = -1 {
-        didSet {
-            guard counter == 0 else { return }
-            counter = -1
-            Task {
-                try await self.exportConvertedAssetContainers()
-            }
-        }
+    init() {
+        let (stream, continuation) = AsyncThrowingStream<VideoExecutorState, any Error>.makeStream()
+        self.continuation = continuation
+        self.executeStream = stream
     }
-    
-    private var fetchItems: [AVAssetContainer] = []
-    
-    private var fetchAssets: [PHAssetResource] = [] {
-        didSet {
-            guard counter == fetchAssets.count else { return }
-            let resultCount = fetchAssets.count
-            
-                for (idx,file) in fetchAssets.enumerated() {
-                    let fileStrings = file.originalFilename.split(separator: ".").map{ String($0) }
-                    let fileName = "\(fileStrings[0])\(idx).\(fileStrings[1])"
-                    let fileURL = FileManager.default.temporaryDirectory.appendingPathComponent(fileName)
-                    if FileManager.default.fileExists(atPath:fileURL.path) {
-                        try? FileManager.default.removeItem(at: fileURL)
-                    }
-                    let option = PHAssetResourceRequestOptions()
-                    option.isNetworkAccessAllowed = true
-                    
-                    Task {
-                        try await PHAssetResourceManager.default().writeData(
-                            for: file,
-                            toFile: fileURL,
-                            options: option
-                        )
-                        let urlAsset = AVURLAsset(url: fileURL)
-                        let value: Float = (try? await Float(urlAsset.load(.duration).value)) ?? 1 // 여기 에러 처리 필요함
-                        let timeScale: Float = (try? await Float(urlAsset.load(.duration).timescale)) ?? 1 // 여기 에러 처리 필요함
-                        let secondsLength = value / timeScale
-                        self.minDuration = min(secondsLength, self.minDuration)
-                        let cnt = self.fetchItems.count
-                        self.fetchItems.append(
-                            AVAssetContainer(
-                                id: file.assetLocalIdentifier,
-                                idx: cnt,
-                                minDuration: 1000,
-                                originalAssetURL: fileURL.absoluteString
-                            )
-                        )
-                    
-                        self.counter -= 1
-                        self.progressSubject.send(min(1, Float(resultCount - self.counter) / Float(2 * resultCount)))
-                }
-            }
-        }
-    }
-    
-    func setFetchResult(result: PHFetchResult<PHAsset>) async {
+    func setFetchResult(result: PHFetchResult<PHAsset>) {
         self.result = result
     }
     func run() async {
-        counter = result.count
-        fetchItems.removeAll()
-        self.minDuration = 1000
-        self.progressSubject.send(0)
-        
         // 여기 락 처리를 안했는데 괜찮을까?
-        result.enumerateObjects(options:.concurrent) { asset, idx, _ in
+        var fetchAssets: [PHAssetResource] = []
+        let lock = NSLock()
+        result.enumerateObjects(options: .concurrent) { asset, idx, _ in
             let files = PHAssetResource.assetResources(for: asset).filter { $0.originalFilename.contains(".MOV") }
-            guard let file = files.first else { return }
-            self.fetchAssets.append(file)
+            guard let file: PHAssetResource = files.first else { return }
+            lock.lock()
+            fetchAssets.append(file)
+            lock.unlock()
         }
-    }
-    private func exportConvertedAssetContainers() async throws {
-        var newAVssetContainers: [AVAssetContainer] = []
-        let resultCount = fetchItems.count
-        for (idx, item) in fetchItems.enumerated() {
-            newAVssetContainers.append(
-                AVAssetContainer(
-                    id: item.id,
-                    idx: item.idx,
-                    minDuration: self.minDuration,
-                    originalAssetURL: item.originalAssetURL
+        let maxCount = fetchAssets.count
+        Task {
+            let option = PHAssetResourceRequestOptions()
+            option.isNetworkAccessAllowed = true
+            var items: [AVAssetContainer] = []
+            var minDuration: Float = 1000
+            self.continuation.yield(.running(0))
+            for (idx, file) in fetchAssets.enumerated() {
+                let fileStrings = file.originalFilename.split(separator: ".").map{ String($0) }
+                let fileName = "\(fileStrings[0])\(idx).\(fileStrings[1])"
+                let fileURL = FileManager.default.temporaryDirectory.appendingPathComponent(fileName)
+                if FileManager.default.fileExists(atPath:fileURL.path) {
+                    try? FileManager.default.removeItem(at: fileURL)
+                }
+                try await PHAssetResourceManager.default().writeData(
+                    for: file,
+                    toFile: fileURL,
+                    options: option
+                )
+                
+                let urlAsset = AVURLAsset(url: fileURL)
+                let value: Float = (try? await Float(urlAsset.load(.duration).value)) ?? 1 // 여기 에러 처리 필요함
+                let timeScale: Float = (try? await Float(urlAsset.load(.duration).timescale)) ?? 1 // 여기 에러 처리 필요함
+                let secondsLength = value / timeScale
+                
+                items.append(
+                    AVAssetContainer(
+                        id: file.assetLocalIdentifier,
+                        idx: idx,
+                        minDuration: 1000,
+                        originalAssetURL: fileURL.absoluteString
+                    )
+                )
+                minDuration = min(secondsLength, minDuration)
+                self.continuation.yield(.running(min(1, Float(idx + 1) / Float(maxCount))))
+            }
+            
+            self.continuation.yield(
+                .finished(
+                    VideoFetchDTO(
+                        minDuration: minDuration,
+                        items: items
+                    )
                 )
             )
-            self.progressSubject.send(min(1, Float(idx) / Float(resultCount * 2) + 0.5))
         }
-        self.fetchItems.removeAll()
-        self.fetchAssets.removeAll()
-        self.itemsSubject.send(newAVssetContainers)
     }
-    
 }
 
 extension VideoExecutor {
@@ -162,4 +147,13 @@ extension FileManager {
         let newFileURL = self.temporaryDirectory.appendingPathComponent(fileName)
         return self.fileExists(atPath: newFileURL.absoluteString)
     }
+}
+
+@globalActor
+struct MyBackgroundActor {
+    static let shared = MyActor()
+}
+
+actor MyActor {
+    var counter = 0
 }

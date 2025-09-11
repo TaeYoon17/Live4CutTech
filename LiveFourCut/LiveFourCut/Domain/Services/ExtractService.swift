@@ -10,7 +10,7 @@ import AVFoundation
 import CoreImage
 import Accelerate
 
-final class ExtractService {
+actor ExtractService {
     private var avAssetContainers: [AVAssetContainer] = []
     private var minDuration: Double = 0.47
     private var frameCounts: Int { avAssetContainers.count }
@@ -30,7 +30,10 @@ final class ExtractService {
         guard !avAssetContainers.isEmpty else { throw ExtractError.emptyContainer }
         let imageDatas: [[CGImage]] = try await withThrowingTaskGroup(of: (Int, [CGImage]).self) { taskGroup in
             for (offset,v) in avAssetContainers.enumerated() {
-                taskGroup.addTask { [self, minDuration, fps] in
+                taskGroup.addTask { [minDuration, fps] in
+//                    guard let self else {
+//                        throw ExtractError.emptyContainer
+//                    }
                     let asset = AVAsset(url: URL(string: v.originalAssetURL)!)
                     let generator = AVAssetImageGenerator(asset: asset)
                     generator.appliesPreferredTrackTransform = true
@@ -41,7 +44,7 @@ final class ExtractService {
                     
                     let time = CMTime(seconds: 0, preferredTimescale: 600)
                     let imgContain = try await generator.image(at: time)
-                    let downImage = self.downsampleVImage(image: imgContain.image)
+                    let downImage = await self.downsampleVImage(image: imgContain.image)
                     imageDatas.append(downImage)
                     lastImage = downImage
                     
@@ -49,7 +52,7 @@ final class ExtractService {
                         let time = CMTime(seconds: Double(idx) / 24, preferredTimescale: 600)
                         let imgContain = try? await generator.image(at: time)
                         if let imgContain {
-                            let downImage = self.downsampleVImage(image: imgContain.image)
+                            let downImage = await self.downsampleVImage(image: imgContain.image)
                             imageDatas.append(downImage)
                             lastImage = downImage
                         }

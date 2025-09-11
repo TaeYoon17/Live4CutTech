@@ -17,7 +17,7 @@ enum FrameServiceError: Error {
 }
 
 /// 기본 프레임 설정...
-protocol FrameServiceProtocol {
+protocol FrameServiceProtocol: Sendable {
     var frameType: FrameType { get }
     var frameTargetSize: CGSize { get }
     func reduce(images: [CGImage]) throws -> CGImage
@@ -33,7 +33,9 @@ struct Frame2x2Generator: FrameServiceProtocol {
         spacing: CGFloat = 4
     ) {
         self.frameType = .basic2x2
-        self.frameTargetSize = CGSize(width: width, height: width * self.frameType.aspectRatio)
+        frameType.aspectRatio
+        let height = (frameType.mergeRatio * (3 * spacing + 2 * width) - 3 * spacing ) / 2
+        self.frameTargetSize = CGSize(width: width, height: height)
         self.spacing = spacing
     }
     
@@ -42,7 +44,7 @@ struct Frame2x2Generator: FrameServiceProtocol {
             guard let flippedImg = try $0.flipImageHorizontal() else {
                 throw FrameServiceError.failDefaultAlignment
             }
-            let (height,width) = (CGFloat(flippedImg.height), CGFloat(flippedImg.width))
+            let (height, width) = (CGFloat(flippedImg.height), CGFloat(flippedImg.width))
             let centerCropSize = CGRect.cropFromCenter(width: width, height: height, ratio: frameTargetSize.ratio)
             return flippedImg.cropping(to: centerCropSize)!
         }
@@ -54,11 +56,14 @@ struct Frame2x2Generator: FrameServiceProtocol {
         let ldRect = CGRect.init(x: spacing, y: nH + 2 * spacing, width: nW, height: nH)
         let rdRect = CGRect.init(x: nW + 2 * spacing, y: nH + 2 * spacing, width: nW, height: nH)
         
+        
+        
         let render = UIGraphicsImageRenderer(size: frameTargetSize)
         
         let imageData: UIImage = render.image { context in
             context.cgContext.setFillColor(UIColor.black.cgColor)
             context.cgContext.fillPath()
+            
             zip(flipCropImages, [ltRect, rtRect, ldRect, rdRect])
                 .forEach { image, rect in
                     context.cgContext.draw(

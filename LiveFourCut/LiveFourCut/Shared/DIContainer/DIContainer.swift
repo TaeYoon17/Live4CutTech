@@ -8,7 +8,8 @@
 import Foundation
 
 final class DIContainer {
-    static let shared = DIContainer()
+    // 이건 대응해야함...
+    nonisolated(unsafe) static let shared = DIContainer()
     var dependencies: [AnyHashable: Any] = [:]
     private init() { }
     

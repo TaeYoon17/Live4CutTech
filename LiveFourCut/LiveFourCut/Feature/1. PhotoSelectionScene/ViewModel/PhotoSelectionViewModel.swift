@@ -51,8 +51,8 @@ extension ThumbnailSelectorProtocol {
     }
 }
 
-
-final class PhotoSelectionViewModel: ThumbnailSelectorProtocol {
+@MainActor
+final class PhotoSelectionViewModel: @preconcurrency ThumbnailSelectorProtocol {
     // MARK: - Published Properties
     @Published private(set) var pickedImageFetchProgress: Float = 0 // 이미지 피커에서 이미지만 가져올 때 로딩
     @Published private(set) var videoLoadingProgress: Float = 0 // 동영상 위치에서 실제 영상 데이터를 가져올 때 로딩
@@ -108,16 +108,24 @@ final class PhotoSelectionViewModel: ThumbnailSelectorProtocol {
         let action = determinePickerAction(for: identifiers, assets: assets)
         self.pickerEventSubject.send(action)
         if case .processImages = action {
-            Task {
-                await self.thumbnailExecutor.setFetchResult(result: assets)
-                await self.thumbnailExecutor.run()
-                await self.videoExecutor.setFetchResult(result: assets)
+            self.thumbnailExecutor.setFetchResult(result: assets)
+            self.thumbnailExecutor.run()
+            Task { [weak videoExecutor] in
+                guard let videoExecutor else {
+                    return
+                }
+                await videoExecutor.setFetchResult(result: assets)
             }
         }
     }
     
     func executeVideoFetch() {
-        Task { await videoExecutor.run() }
+        Task { [weak videoExecutor] in
+            guard let videoExecutor else {
+                return
+            }
+            await videoExecutor.run()
+        }
     }
 }
 
@@ -135,24 +143,25 @@ fileprivate extension PhotoSelectionViewModel {
             self.pickedImageFetchProgress = progress
         }.store(in: &cancellables)
         
-        videoExecutor.progressSubject.sink { [weak self] progress in
-            guard let self else { return }
-            videoLoadingProgress = progress
-        }.store(in: &cancellables)
-        
-        videoExecutor.itemsSubject
-            .sink { [weak self] videos in
-                guard let self else { return }
-                let images = self.selectImageContainerSubject.value.compactMap { $0 }
-                var result: [AVAssetContainer] = []
-                for image in images {
+        Task { [weak videoExecutor] in
+            guard let videoExecutor else { return }
+            for try await executor in await videoExecutor.executeStream {
+                switch executor {
+                case .finished(let dto):
+                    let images = self.selectImageContainerSubject.value.compactMap { $0 }
+                    var result: [AVAssetContainer] = []
+                    let videos = dto.items
+                    for image in images {
                     if let video = videos.first(where: { $0.id == image.id }) {
-                        result.append(video)
+                            result.append(video)
+                        }
                     }
+                    videoAssetContinersSubject.send((result, dto.minDuration))
+                case .running(let progress):
+                    self.pickedImageFetchProgress = progress
                 }
-                
-                videoAssetContinersSubject.send((result, videoExecutor.minDuration))
-            }.store(in: &cancellables)
+            }
+        }
         
     }
     private func determinePickerAction(for identifiers: [String], assets: PHFetchResult<PHAsset>) -> PhotoPickerEvent {

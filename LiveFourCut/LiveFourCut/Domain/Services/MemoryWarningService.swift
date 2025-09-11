@@ -11,7 +11,7 @@ import UIKit
 
 
 // 간단한 메모리 피크 감지
-protocol MemoryWarningServiceProtocol {
+protocol MemoryWarningServiceProtocol: Sendable {
     var isMemoryWarning: Bool { get async }
 }
 

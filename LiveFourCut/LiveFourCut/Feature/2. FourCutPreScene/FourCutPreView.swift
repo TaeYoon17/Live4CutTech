@@ -38,7 +38,10 @@ final class FourCutPreView: UIView {
     
     private let shareBtn = DoneBtn(title: "4컷 영상 추출하러가기")
     
-    init() {
+    private let frameType: FrameType
+    
+    init(frameType: FrameType) {
+        self.frameType = frameType
         super.init(frame: .zero)
         self.backgroundColor = .systemBackground
         configureLayout()
@@ -80,7 +83,7 @@ fileprivate extension FourCutPreView {
        preFourFrameView.snp.makeConstraints { make in
            make.top.equalTo(descLabel.snp.bottom).offset(12)
            make.horizontalEdges.equalToSuperview().inset(50)
-           make.height.equalTo(preFourFrameView.snp.width).multipliedBy(1.77)
+           make.height.equalTo(preFourFrameView.snp.width).multipliedBy(frameType.mergeRatio)
        }
        bottomFrameView.snp.makeConstraints { make in
            make.top.equalTo(preFourFrameView.snp.bottom)

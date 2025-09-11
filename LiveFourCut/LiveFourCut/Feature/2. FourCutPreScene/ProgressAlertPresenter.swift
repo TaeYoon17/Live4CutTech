@@ -8,6 +8,7 @@
 import UIKit
 import Combine
 
+@MainActor
 final class ProgressAlertPresenter {
     let cancelPublisher = PassthroughSubject<Void, Never>()
     private weak var viewController: UIViewController!

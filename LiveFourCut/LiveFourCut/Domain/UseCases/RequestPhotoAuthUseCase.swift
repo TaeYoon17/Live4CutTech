@@ -7,7 +7,7 @@
 
 import Foundation
 
-protocol RequestPhotoAuthUseCase {
+protocol RequestPhotoAuthUseCase: Sendable {
     func execute() async -> AlbumAuthorization
 }
 

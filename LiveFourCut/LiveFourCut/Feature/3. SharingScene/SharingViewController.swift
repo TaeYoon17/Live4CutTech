@@ -10,7 +10,8 @@ import AVFoundation
 import Combine
 
 final class SharingViewController: BaseVC {
-    private let contentView = SharingView()
+    private lazy var contentView = SharingView(frameType: frameType)
+    let frameType: FrameType
     var videoURL: URL?
     private var playerLayer: AVPlayerLayer?
     private var queuePlayer = AVQueuePlayer()
@@ -18,12 +19,19 @@ final class SharingViewController: BaseVC {
     
     private var cancellables = Set<AnyCancellable>()
     
+    init(frameType: FrameType, videoURL: URL) {
+        self.videoURL = videoURL
+        self.frameType = frameType
+        super.init(nibName: nil, bundle: nil)
+    }
     
+    @MainActor required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
     // MARK: - Deinitializer
     deinit {
         queuePlayer.pause()
         self.looper = nil
-        self.playerLayer = nil
     }
     // MARK: - Life Cycle
     override func loadView() {
@@ -38,7 +46,7 @@ final class SharingViewController: BaseVC {
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         self.playerLayer?.frame = self.contentView.videoFrameView.bounds
-        self.playerLayer?.videoGravity = .resizeAspectFill
+        self.playerLayer?.videoGravity = .resizeAspect
     }
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)

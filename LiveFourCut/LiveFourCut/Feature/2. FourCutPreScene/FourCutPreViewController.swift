@@ -15,12 +15,12 @@ final class FourCutPreViewController: BaseVC {
     let videoMaker: VideMakerProtocol
     
     //MARK: -- View 저장 프로퍼티
-    private lazy var contentView = FourCutPreView()
+    private lazy var contentView = FourCutPreView(frameType: frameType)
     private lazy var progressAlertPresenter = ProgressAlertPresenter(viewController: self)
     
     @Published private var minDuration: Double
     @Published private var avAssetContainers: [AVAssetContainer]
-    @Published private var frameType: FrameType
+    private let frameType: FrameType
     
     private var cancellables = Set<AnyCancellable>()
     private var makingVideoTask: Task<Void, Never>?
@@ -97,8 +97,7 @@ final class FourCutPreViewController: BaseVC {
                         guard let self else { return }
                         self.view.isUserInteractionEnabled = true
                         progressAlertPresenter.progressWaitStop()
-                        let sharingViewController = SharingViewController()
-                        sharingViewController.videoURL = outputURL
+                        let sharingViewController = SharingViewController(frameType: frameType, videoURL: outputURL)
                         self.navigationController?.isNavigationBarHidden = true
                         self.navigationController?.pushViewController(sharingViewController, animated: true)
                     } failed: { [weak self] error in
@@ -138,10 +137,12 @@ final class FourCutPreViewController: BaseVC {
         
         assetInfoPublisher.sink { [weak self] (minDuration, avAssetContainers) in
             guard let self else { return }
-            self.extractService.setUp(
-                minDuration: minDuration,
-                avAssetContainers: avAssetContainers
-            )
+            Task {
+                await extractService.setUp(
+                    minDuration: minDuration,
+                    avAssetContainers: avAssetContainers
+                )
+            }
         }.store(in: &cancellables)
     }
     

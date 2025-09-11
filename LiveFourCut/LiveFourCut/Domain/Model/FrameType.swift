@@ -10,6 +10,12 @@ import Foundation
 enum FrameType {
     case basic2x2
     
+    var mergeRatio: CGFloat {
+        switch self {
+        case .basic2x2: return 1.77
+        }
+    }
+    
     var frameCount: Int {
         switch self {
         case .basic2x2: return 4

@@ -105,7 +105,7 @@ final class PhotoSelectionViewController: LoadingVC {
                         extractService: ExtractService(),
                         videoMaker: VideoMaker(
                             memoryWarningService: MemoryWarningActor(),
-                            frameService: Frame2x2Generator(width: 480)
+                            frameService: Frame2x2Generator(width: 480, spacing: 8)
                         ), // 여기 값 전달이 좀 아쉽다...
                         avAssetContainers: container
                     )

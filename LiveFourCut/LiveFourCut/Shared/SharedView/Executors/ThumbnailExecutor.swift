@@ -14,8 +14,8 @@ import UIKit
 protocol ThumbnailExecutorProtocol {
     var itemsSubject: PassthroughSubject<[ImageContainer], Never> { get }
     var progressSubject: PassthroughSubject<Float, Never>  { get }
-    func setFetchResult(result: PHFetchResult<PHAsset>) async
-    func run() async
+    func setFetchResult(result: PHFetchResult<PHAsset>)
+    func run()
 }
 
 final class ThumbnailExecutor: ThumbnailExecutorProtocol {
@@ -39,34 +39,33 @@ final class ThumbnailExecutor: ThumbnailExecutorProtocol {
     private var fetchAssets: [PHAsset] = [] {
         didSet {
             guard counter == fetchAssets.count else { return }
-            Task {
-                let resultCount = self.fetchAssets.count
-                for asset in fetchAssets {
-                    fetchImage(
-                        phAsset: asset,
-                        size: .init(width: 3 * 120, height: 3 * 120 * 1.77),
-                        contentMode: .aspectFill) { image in
-                        let count = self.fetchItems.count
-                            self.fetchItems.append(
-                                ImageContainer(
-                                    id: asset.localIdentifier,
-                                    image: image,
-                                    idx: count
-                                )
+            let resultCount = self.fetchAssets.count
+            for asset in fetchAssets {
+                fetchImage(
+                    phAsset: asset,
+                    size: CGSize(width: 3 * 120, height: 3 * 120 * 1.77),
+                    contentMode: .aspectFill) { image in
+                    let count = self.fetchItems.count
+                        self.fetchItems.append(
+                            ImageContainer(
+                                id: asset.localIdentifier,
+                                image: image,
+                                idx: count
                             )
-                        self.counter -= 1
-                        self.progressSubject.send(min(1,(Float(resultCount - self.counter) / Float(resultCount))))
-                    }
+                        )
+                    self.counter -= 1
+                    self.progressSubject.send(min(1,(Float(resultCount - self.counter) / Float(resultCount))))
                 }
             }
+            
         }
     }
     
-    func setFetchResult(result: PHFetchResult<PHAsset>) async {
+    func setFetchResult(result: PHFetchResult<PHAsset>) {
         self.result = result
     }
     
-    func run() async {
+    func run() {
         counter = result.count
         fetchItems.removeAll()
         self.progressSubject.send(0)

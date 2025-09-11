@@ -8,7 +8,7 @@
 import Foundation
 import Photos
 
-protocol PhotoAuthorizationRepository {
+protocol PhotoAuthorizationRepository: Sendable {
     func checkCurrentStatus() -> AlbumAuthorization
     func requestAuthorization() async -> AlbumAuthorization
 }

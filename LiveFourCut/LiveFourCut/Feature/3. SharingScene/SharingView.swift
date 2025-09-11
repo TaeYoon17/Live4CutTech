@@ -34,7 +34,10 @@ final class SharingView: UIView {
     private let navigationBackButton = NavigationBackButton()
     private let shareBtn = ShareBtn()
     
-    init() {
+    private let frameType: FrameType
+    
+    init(frameType: FrameType) {
+        self.frameType = frameType
         super.init(frame: .zero)
         self.backgroundColor = .systemBackground
         configureLayout()
@@ -66,7 +69,7 @@ final class SharingView: UIView {
         videoFrameView.snp.makeConstraints { make in
             make.top.equalTo(descLabel.snp.bottom).offset(18)
             make.horizontalEdges.equalToSuperview().inset(50)
-            make.height.equalTo(videoFrameView.snp.width).multipliedBy(1.77)
+            make.height.equalTo(videoFrameView.snp.width).multipliedBy(frameType.mergeRatio)
         }
         bottomFrameView.snp.makeConstraints { make in
             make.top.equalTo(videoFrameView.snp.bottom)

@@ -9,7 +9,7 @@ import Foundation
 import CoreGraphics
 import AVFoundation
 
-protocol VideMakerProtocol {
+protocol VideMakerProtocol: Sendable {
     func transpose(_ matrix: inout [[CGImage]])
     ///    func reduce(images: [CGImage], spacing:CGFloat) throws -> CGImage
     /// [[frameType 별 이미지 배열]] -> Frame 계수
@@ -68,35 +68,41 @@ final class VideoMaker: VideMakerProtocol {
             throw VideoMakerError.noneMatchFrameMode
         }
         
+        let (writer, writerInput, adaptor) = try makeAVService(
+            width: reduceImage.width,
+            height: reduceImage.height,
+            outputURL: outputURL
+        )
+        
+        
+        let copiedGroupImage = groupImage
         return AsyncThrowingStream { conti in
-            var frameCount: Int = 0
+            
             let maxFrameCount: Int = groupImage.count
-            Task { [groupImage] in
-                let (writer, writerInput, adaptor) = try makeAVService(
-                    width: reduceImage.width,
-                    height: reduceImage.height,
-                    outputURL: outputURL
-                )
+            
+            Task { @Sendable in
+                var frameCount: Int = 0
+                var groupImage = copiedGroupImage
                 let fps = 24
                 writer.startWriting()
                 writer.startSession(atSourceTime: .zero)
-                var groupImage = groupImage
                 while groupImage.isEmpty == false {
-                    while await self.memoryWarningService.isMemoryWarning { }
+                    while await memoryWarningService.isMemoryWarning { }
                     try autoreleasepool { // CVPixelBuffer가 쌓이지 않도록
                         while !writerInput.isReadyForMoreMediaData { }
                         var pixelBuffer: CVPixelBuffer?
                         let singleFrameImages: [CGImage] = groupImage.removeLast()
-                        guard let reduceImage = try? self.frameService.reduce(images: singleFrameImages) else {
+                        guard let reduceImage = try? frameService.reduce(images: singleFrameImages) else {
                             assertionFailure("왜 없음?")
                             return
                         }
+                        
                         reduceImage.getCVPixelBuffer(pixelBuffer: &pixelBuffer)
                         guard var pixelBuffer else {
                             throw VideoMakerError.faileToCreatePixelBuffer
                         }
                         
-                        let frameTime = CMTimeMake(value: Int64(frameCount), timescale: Int32(fps))
+                        let frameTime: CMTime = CMTimeMake(value: Int64(frameCount), timescale: Int32(fps))
                         CVPixelBufferLockBaseAddress(pixelBuffer, [])
                         reduceImage.drawCVPixelBuffer(&pixelBuffer)
                         adaptor.append(pixelBuffer, withPresentationTime: frameTime)
@@ -112,6 +118,7 @@ final class VideoMaker: VideMakerProtocol {
             }
         }
     }
+    
     
     private func makeAVService(
         width: Int,
@@ -147,3 +154,6 @@ final class VideoMaker: VideMakerProtocol {
         return (writer, writerInput, adaptor)
     }
 }
+extension AVAssetWriter: @unchecked @retroactive Sendable { }
+extension AVAssetWriterInput: @unchecked @retroactive Sendable { }
+extension AVAssetWriterInputPixelBufferAdaptor: @unchecked @retroactive Sendable { }

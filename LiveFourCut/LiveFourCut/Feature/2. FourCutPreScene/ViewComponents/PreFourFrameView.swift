@@ -67,6 +67,7 @@ final class Pre2x2FrameView: UIStackView {
             bottom: frameSpacing,
             right: frameSpacing)
         self.tag = 0
+        
     }
     
     required init(coder: NSCoder) {

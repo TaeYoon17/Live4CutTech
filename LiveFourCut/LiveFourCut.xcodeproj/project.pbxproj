@@ -72,7 +72,6 @@
 		63E30B122C38283300374372 /* LoadingVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63E30B082C38283300374372 /* LoadingVC.swift */; };
 		63F6E76C2E71C7B00007157F /* ProgressAlertPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63F6E76B2E71C7B00007157F /* ProgressAlertPresenter.swift */; };
 		63FC26212C357B74007C6703 /* ExtractService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63FC26202C357B74007C6703 /* ExtractService.swift */; };
-		63FC70432C201F1E00F9B3A0 /* LPtoAVService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63FC70422C201F1E00F9B3A0 /* LPtoAVService.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -175,7 +174,6 @@
 		63E30B082C38283300374372 /* LoadingVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoadingVC.swift; sourceTree = "<group>"; };
 		63F6E76B2E71C7B00007157F /* ProgressAlertPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgressAlertPresenter.swift; sourceTree = "<group>"; };
 		63FC26202C357B74007C6703 /* ExtractService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExtractService.swift; sourceTree = "<group>"; };
-		63FC70422C201F1E00F9B3A0 /* LPtoAVService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LPtoAVService.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -526,7 +524,6 @@
 		63FC703F2C201D8600F9B3A0 /* Services */ = {
 			isa = PBXGroup;
 			children = (
-				63FC70422C201F1E00F9B3A0 /* LPtoAVService.swift */,
 				63DB9D4F2C21ED9A0047DED0 /* PHAssetExtensions.swift */,
 				63FC26202C357B74007C6703 /* ExtractService.swift */,
 				63B68F7A2C35932A0047D610 /* FrameService.swift */,
@@ -700,7 +697,6 @@
 				63E30B102C38283300374372 /* CardView.swift in Sources */,
 				63AC04712E671D1100714145 /* SharingView.swift in Sources */,
 				63AC1A0F2E6722B00040A451 /* CGRect+.swift in Sources */,
-				63FC70432C201F1E00F9B3A0 /* LPtoAVService.swift in Sources */,
 				63AC046F2E6715C300714145 /* FourCutPreView.swift in Sources */,
 				63AC046D2E66F8D900714145 /* PhotoSelectionView.swift in Sources */,
 				63C036342E6A905000BB449F /* TempTestVC.swift in Sources */,
@@ -931,7 +927,7 @@
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
@@ -968,7 +964,7 @@
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;
