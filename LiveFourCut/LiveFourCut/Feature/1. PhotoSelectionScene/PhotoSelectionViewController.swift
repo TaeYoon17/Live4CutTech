@@ -12,6 +12,9 @@ import Photos
 import PhotosUI
 
 final class PhotoSelectionViewController: LoadingVC {
+    
+    @Dependency private var videoMakerFactory: VideoMakerFactoryProtocol
+    
     //MARK: -- View 저장 프로퍼티
     private let viewModel: PhotoSelectionViewModel
     private lazy var contentView = PhotoSelectionView(thumbnailSelector: viewModel)
@@ -99,14 +102,11 @@ final class PhotoSelectionViewController: LoadingVC {
                 guard let self else { return }
                 dismissLoadingAlert { [weak self] in
                     guard let self else { return }
+                    let frameGenerator = Frame2x2Generator(width: 480, spacing: 8)
                     let vc = FourCutPreViewController(
                         minDuration: Double(minDuration),
                         frameType: viewModel.frameType,
-                        extractService: ExtractService(),
-                        videoMaker: VideoMaker(
-                            memoryWarningService: MemoryWarningActor(),
-                            frameService: Frame2x2Generator(width: 480, spacing: 8)
-                        ), // 여기 값 전달이 좀 아쉽다...
+                        videoMaker: videoMakerFactory.makeVideoMaker(frameGenerator: frameGenerator), // 여기 값 전달이 좀 아쉽다...
                         avAssetContainers: container
                     )
                     navigationController?.pushViewController(vc, animated: true)

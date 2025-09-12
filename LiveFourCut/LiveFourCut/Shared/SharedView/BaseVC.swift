@@ -9,6 +9,7 @@ import Foundation
 import UIKit
 
 class BaseVC: UIViewController {
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         configureLayout()
@@ -16,6 +17,7 @@ class BaseVC: UIViewController {
         configureNavigation()
         configureView()
     }
+    
     func configureLayout() { }
     func configureConstraints() { }
     func configureView() { }

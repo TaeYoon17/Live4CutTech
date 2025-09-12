@@ -7,8 +7,9 @@
 
 import UIKit
 
-final class NavigationBackButton:UIButton{
+final class NavigationBackButton: UIButton {
     var action:(()->())?
+    
     init() {
         super.init(frame: .zero)
         var config = UIButton.Configuration.plain()
@@ -24,9 +25,11 @@ final class NavigationBackButton:UIButton{
         self.tintColor = .tintColor
         self.addTarget(self, action: #selector(Self.btnTapped(sender:)), for: .touchUpInside)
     }
+    
     required init?(coder: NSCoder) {
         fatalError("Don't use storyboard")
     }
+    
     @objc func btnTapped(sender: UIButton) {
         action?()
     }

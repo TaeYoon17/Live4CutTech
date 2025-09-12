@@ -17,19 +17,25 @@ final class ShareBtn: UIButton {
         config.baseForegroundColor = .white
         config.attributedTitle = .init(
             "공유하기",
-            attributes: .init([.font: UIFont.systemFont(ofSize: 17, weight: .semibold)])
+            attributes: .init([
+                .font: UIFont.systemFont(ofSize: 17, weight: .semibold)
+            ])
         )
         config.image = UIImage(systemName: "square.and.arrow.up")
         config.imagePadding = 8
         self.configuration = config
-        self.addTarget(self, action: #selector(Self.shareButtonTapped(sender:)), for: .touchUpInside)
+        self.addTarget(
+            self,
+            action: #selector(Self.shareButtonTapped(sender:)),
+            for: .touchUpInside
+        )
     }
     
     required init?(coder: NSCoder) {
         fatalError("Don't use storyboard")
     }
     
-    @objc func shareButtonTapped(sender: UIButton){
+    @objc func shareButtonTapped(sender: UIButton) {
         action?()
     }
 }

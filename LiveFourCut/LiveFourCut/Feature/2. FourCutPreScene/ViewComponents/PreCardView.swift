@@ -9,13 +9,15 @@ import Foundation
 import UIKit
 import AVFoundation
 import Combine
-extension FrameType {
+
+fileprivate extension FrameType {
     var aspectRatio: CGFloat {
         switch self {
         case .basic2x2: 1.58
         }
     }
 }
+
 final class PreCardView: UIView {
     var minDuration: Float = Constants.defaultMinDurationSeconds {
         didSet {
@@ -26,7 +28,7 @@ final class PreCardView: UIView {
                     preferredTimescale: CMTimeScale(Constants.preferredTimescale)
                 )
             )
-            print("바뀐 minDuration: \(minDuration),  timeRange: \(timeRange)")
+            
             if let item, self.looper == nil {
                 self.looper = AVPlayerLooper(
                     player: queuePlayer,

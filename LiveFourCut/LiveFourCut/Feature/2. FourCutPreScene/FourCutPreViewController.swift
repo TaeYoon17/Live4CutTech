@@ -11,8 +11,9 @@ import CoreMedia
 
 final class FourCutPreViewController: BaseVC {
     // MARK: -- Service 연결
-    let extractService: ExtractService
-    let videoMaker: VideMakerProtocol
+    
+    @Dependency private var extractService: VideoFrameExtractorProtocol
+    let videoMaker: VideoMakerProtocol
     
     //MARK: -- View 저장 프로퍼티
     private lazy var contentView = FourCutPreView(frameType: frameType)
@@ -28,11 +29,9 @@ final class FourCutPreViewController: BaseVC {
     init(
         minDuration: Double,
         frameType: FrameType,
-        extractService: ExtractService,
-        videoMaker: VideMakerProtocol,
+        videoMaker: VideoMakerProtocol,
         avAssetContainers: [AVAssetContainer]
     ) {
-        self.extractService = extractService
         self.videoMaker = videoMaker
         self.minDuration = minDuration
         self.avAssetContainers = avAssetContainers
@@ -137,7 +136,8 @@ final class FourCutPreViewController: BaseVC {
         
         assetInfoPublisher.sink { [weak self] (minDuration, avAssetContainers) in
             guard let self else { return }
-            Task {
+            Task { [weak extractService] in
+                guard let extractService else { return }
                 await extractService.setUp(
                     minDuration: minDuration,
                     avAssetContainers: avAssetContainers
@@ -154,9 +154,10 @@ final class FourCutPreViewController: BaseVC {
     ) {
         onStart()
         makingVideoTask?.cancel()
-        makingVideoTask = Task {
+        makingVideoTask = Task { [weak extractService] in
             do {
-                var frameImages: [[CGImage]] = try await self.extractService.extractFrameImages() // [4 * frameCount]
+                guard let extractService else { return }
+                var frameImages: [[CGImage]] = try await extractService.extractFrameImages() // [4 * frameCount]
                 if Task.isCancelled { return }
                 
                 let outputURL = FileManager.default.temporaryDirectory.appendingPathComponent("LiveFourCut.mp4")

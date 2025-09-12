@@ -10,6 +10,12 @@ import Foundation
 enum FrameType {
     case basic2x2
     
+    var name: String {
+        switch self {
+        case .basic2x2: return "basic2x2"
+        }
+    }
+    
     var mergeRatio: CGFloat {
         switch self {
         case .basic2x2: return 1.77

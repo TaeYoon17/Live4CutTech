@@ -15,8 +15,8 @@ enum PhotoSelectionEvent {
 }
 
 final class PhotoSelectionView: UIView {
-    let eventPublisher = PassthroughSubject<PhotoSelectionEvent, Never>()
     
+    let eventPublisher = PassthroughSubject<PhotoSelectionEvent, Never>()
     private weak var thumbnailSelector: ThumbnailSelectorProtocol!
     //MARK: -- View 저장 프로퍼티
     private lazy var thumbnailFrameView = ThumbnailFourFrameView(thumbnailSelector: thumbnailSelector)
@@ -87,7 +87,9 @@ final class PhotoSelectionView: UIView {
         thumbnailFrameView.reset()
     }
 }
-extension PhotoSelectionView {
+
+
+fileprivate extension PhotoSelectionView {
 
     private func configureLayout() {
         self.addSubview(navigationBackButton)

@@ -11,23 +11,19 @@ import Photos
 
 final class FrameSelectionViewController: UIViewController {
     // MARK: - Properties
-    private let contentView: FrameSelectionView = .init()
-    private var cancellable: Set<AnyCancellable> = []
+    private let contentView = FrameSelectionView()
     private lazy var alertPresenter = FrameSelectionAlertPresenter(viewController: self)
     
+    @Dependency private var checkPhotoAuthUseCase: CheckPhotoAuthUseCase
+    @Dependency private var requestPhotoAuthUseCase: RequestPhotoAuthUseCase
     
-    private let checkPhotoAuthUseCase: CheckPhotoAuthUseCase = DefaultCheckPhotoAuthUseCase(
-        photoAuthrepository: DefaultPhotoAuthorizationRepository()
-    )
-    private let requestPhotoAuthUseCase: RequestPhotoAuthUseCase = DefaultRequestPhotoAuthUseCase(
-        photoAuthrepository: DefaultPhotoAuthorizationRepository()
-    )
+    private var cancellable: Set<AnyCancellable> = []
     
+    // MARK: - Life Cycle
     override func loadView() {
         self.view = contentView
     }
     
-    // MARK: - Life Cycle
     override func viewDidLoad() {
         super.viewDidLoad()
         self.navigationController?.setNavigationBarHidden(true, animated: false)

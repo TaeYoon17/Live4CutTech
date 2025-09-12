@@ -25,11 +25,7 @@ enum VideoExecutorState {
     case finished(VideoFetchDTO)
 }
 
-protocol VideoExecutorProtocol: AnyObject, Sendable {
-    var executeStream: AsyncThrowingStream<VideoExecutorState, Error> { get async }
-    func setFetchResult(result: PHFetchResult<PHAsset>) async
-    func run() async
-}
+
 
 actor VideoExecutor: VideoExecutorProtocol {
     
@@ -142,18 +138,9 @@ extension VideoExecutor {
     }
 }
 
-extension FileManager {
+fileprivate extension FileManager {
     func tempFileExist(fileName: String) async throws -> Bool {
         let newFileURL = self.temporaryDirectory.appendingPathComponent(fileName)
         return self.fileExists(atPath: newFileURL.absoluteString)
     }
-}
-
-@globalActor
-struct MyBackgroundActor {
-    static let shared = MyActor()
-}
-
-actor MyActor {
-    var counter = 0
 }

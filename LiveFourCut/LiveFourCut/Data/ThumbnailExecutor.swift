@@ -10,14 +10,6 @@ import Combine
 import Photos
 import UIKit
 
-
-protocol ThumbnailExecutorProtocol {
-    var itemsSubject: PassthroughSubject<[ImageContainer], Never> { get }
-    var progressSubject: PassthroughSubject<Float, Never>  { get }
-    func setFetchResult(result: PHFetchResult<PHAsset>)
-    func run()
-}
-
 final class ThumbnailExecutor: ThumbnailExecutorProtocol {
     let itemsSubject: PassthroughSubject<[ImageContainer], Never> = .init()
     let progressSubject: PassthroughSubject<Float, Never> = .init()
@@ -43,8 +35,12 @@ final class ThumbnailExecutor: ThumbnailExecutorProtocol {
             for asset in fetchAssets {
                 fetchImage(
                     phAsset: asset,
-                    size: CGSize(width: 3 * 120, height: 3 * 120 * 1.77),
-                    contentMode: .aspectFill) { image in
+                    size: CGSize(
+                        width: 3 * 120,
+                        height: 3 * 120 * 1.77
+                    ),
+                    contentMode: .aspectFill
+                ) { image in
                     let count = self.fetchItems.count
                         self.fetchItems.append(
                             ImageContainer(

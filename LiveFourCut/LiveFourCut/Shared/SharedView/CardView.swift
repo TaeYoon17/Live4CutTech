@@ -9,7 +9,6 @@ import UIKit
 import SnapKit
 
 class CardView: UIImageView {
-    
     var thumbnail: UIImage? {
         didSet {
             guard let thumbnail else {

@@ -1,16 +1,16 @@
 //
-//  ExtractService.swift
+//  VideoFrameExtractorImpl.swift
 //  LiveFourCut
 //
-//  Created by Greem on 7/3/24.
+//  Created by Greem on 9/12/25.
 //
 
 import Foundation
-import AVFoundation
 import CoreImage
 import Accelerate
+import AVFoundation
 
-actor ExtractService {
+actor VideoFrameExtractor: VideoFrameExtractorProtocol {
     private var avAssetContainers: [AVAssetContainer] = []
     private var minDuration: Double = 0.47
     private var frameCounts: Int { avAssetContainers.count }
@@ -21,7 +21,7 @@ actor ExtractService {
     func setUp(
         minDuration: Double,
         avAssetContainers: [AVAssetContainer]
-    ) {
+    ) async {
         self.minDuration = minDuration
         self.avAssetContainers = avAssetContainers
     }
@@ -31,9 +31,6 @@ actor ExtractService {
         let imageDatas: [[CGImage]] = try await withThrowingTaskGroup(of: (Int, [CGImage]).self) { taskGroup in
             for (offset,v) in avAssetContainers.enumerated() {
                 taskGroup.addTask { [minDuration, fps] in
-//                    guard let self else {
-//                        throw ExtractError.emptyContainer
-//                    }
                     let asset = AVAsset(url: URL(string: v.originalAssetURL)!)
                     let generator = AVAssetImageGenerator(asset: asset)
                     generator.appliesPreferredTrackTransform = true
@@ -56,7 +53,7 @@ actor ExtractService {
                             imageDatas.append(downImage)
                             lastImage = downImage
                         }
-                        else{
+                        else {
                             imageDatas.append(lastImage)
                         }
                     }
@@ -75,7 +72,8 @@ actor ExtractService {
         return imageDatas
     }
 }
-extension ExtractService {
+
+fileprivate extension VideoFrameExtractor {
     func downSample(image: CGImage) -> CGImage {
         
         let ciImage = CIImage(cgImage: image)
@@ -90,7 +88,8 @@ extension ExtractService {
         return afterDownsamplingImage
     }
 }
-extension ExtractService {
+
+fileprivate extension VideoFrameExtractor {
     func downsampleVImage(
         image: CGImage,
         targetSize: CGSize = .init(width: 480, height: 480 * 1.77)

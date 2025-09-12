@@ -1,29 +1,15 @@
 //
-//  FrameService.swift
+//  Frame2x2Generator.swift
 //  LiveFourCut
 //
-//  Created by Greem on 7/3/24.
+//  Created by Greem on 9/12/25.
 //
 
 import Foundation
+import CoreGraphics
 import UIKit
-import Combine
-import AVFoundation
 
-enum FrameServiceError: Error {
-    case noneMatchFrameMode
-    case failDefaultAlignment
-    case renderFailed
-}
-
-/// 기본 프레임 설정...
-protocol FrameServiceProtocol: Sendable {
-    var frameType: FrameType { get }
-    var frameTargetSize: CGSize { get }
-    func reduce(images: [CGImage]) throws -> CGImage
-}
-
-struct Frame2x2Generator: FrameServiceProtocol {
+struct Frame2x2Generator: FrameGeneratorProtocol {
     var frameType: FrameType
     let frameTargetSize: CGSize
     let spacing: CGFloat
@@ -33,7 +19,6 @@ struct Frame2x2Generator: FrameServiceProtocol {
         spacing: CGFloat = 4
     ) {
         self.frameType = .basic2x2
-        frameType.aspectRatio
         let height = (frameType.mergeRatio * (3 * spacing + 2 * width) - 3 * spacing ) / 2
         self.frameTargetSize = CGSize(width: width, height: height)
         self.spacing = spacing
@@ -42,7 +27,7 @@ struct Frame2x2Generator: FrameServiceProtocol {
     func reduce(images: [CGImage]) throws -> CGImage {
         let flipCropImages = try images.map {
             guard let flippedImg = try $0.flipImageHorizontal() else {
-                throw FrameServiceError.failDefaultAlignment
+                throw FrameGenerateError.failDefaultAlignment
             }
             let (height, width) = (CGFloat(flippedImg.height), CGFloat(flippedImg.width))
             let centerCropSize = CGRect.cropFromCenter(width: width, height: height, ratio: frameTargetSize.ratio)
@@ -55,8 +40,6 @@ struct Frame2x2Generator: FrameServiceProtocol {
         let rtRect = CGRect.init(x: nW + 2 * spacing, y: spacing, width: nW, height: nH)
         let ldRect = CGRect.init(x: spacing, y: nH + 2 * spacing, width: nW, height: nH)
         let rdRect = CGRect.init(x: nW + 2 * spacing, y: nH + 2 * spacing, width: nW, height: nH)
-        
-        
         
         let render = UIGraphicsImageRenderer(size: frameTargetSize)
         
@@ -75,7 +58,7 @@ struct Frame2x2Generator: FrameServiceProtocol {
         }
         
         guard let image = imageData.cgImage else {
-            throw FrameServiceError.renderFailed
+            throw FrameGenerateError.renderFailed
         }
         
         return image
@@ -118,13 +101,6 @@ fileprivate extension CGContext {
     }
 }
 
-
-
-
 fileprivate extension CGSize {
     var ratio: CGFloat { width / height }
 }
-
-
-
-

@@ -8,48 +8,7 @@
 import Foundation
 import UIKit
 import Combine
-import Photos
 import PhotosUI
-
-protocol ThumbnailSelectorProtocol: AnyObject {
-    var selectImageContainerSubject: CurrentValueSubject<[ImageContainer?],Never> { get }
-    var selectedImageIndexes: AnyPublisher<[Bool], Never> { get }
-    var frameType: FrameType { get }
-    func appendSelectImage(container: ImageContainer) -> Int
-    func removeSelectImage(idx: Int)
-    func removeSelectImage(containerID: ImageContainer.ID)
-    func resetSelectImage()
-}
-
-extension ThumbnailSelectorProtocol {
-    @discardableResult
-    func appendSelectImage(container: ImageContainer) -> Int {
-        var currentSubjectValue = self.selectImageContainerSubject.value
-        // 현재 비어있는 것 중 가장 맨 앞의 Index를 찾음
-        let firstIdx = currentSubjectValue.firstIndex(where: { $0 == nil } ).map { Int($0) }!
-        currentSubjectValue[firstIdx] = container
-        selectImageContainerSubject.send(currentSubjectValue)
-        return firstIdx
-    }
-    
-    func removeSelectImage(idx: Int) {
-        var currentSubjectValue = self.selectImageContainerSubject.value
-        let firstIdx = currentSubjectValue.firstIndex(where: {$0?.idx == idx}).map { Int($0) }!
-        currentSubjectValue[firstIdx] = nil
-        selectImageContainerSubject.send(currentSubjectValue)
-    }
-    
-    func removeSelectImage(containerID: ImageContainer.ID) {
-        var currentSubjectValue = self.selectImageContainerSubject.value
-        let firstIdx = currentSubjectValue.firstIndex(where: {$0?.id == containerID}).map { Int($0) }!
-        currentSubjectValue[firstIdx] = nil
-        selectImageContainerSubject.send(currentSubjectValue)
-    }
-    
-    func resetSelectImage() {
-        selectImageContainerSubject.send((0..<frameType.frameCount).map { _ in nil })
-    }
-}
 
 @MainActor
 final class PhotoSelectionViewModel: @preconcurrency ThumbnailSelectorProtocol {
@@ -79,8 +38,8 @@ final class PhotoSelectionViewModel: @preconcurrency ThumbnailSelectorProtocol {
      // MARK: - Properties
     let frameType: FrameType
     
-    private let thumbnailExecutor: ThumbnailExecutorProtocol = ThumbnailExecutor()
-    private let videoExecutor: VideoExecutorProtocol = VideoExecutor()
+    @Dependency private var thumbnailExecutor: ThumbnailExecutorProtocol
+    @Dependency private var videoExecutor: VideoExecutorProtocol
     private var cancellables = Set<AnyCancellable>()
     
     init(frameType: FrameType) {
@@ -164,6 +123,7 @@ fileprivate extension PhotoSelectionViewModel {
         }
         
     }
+    
     private func determinePickerAction(for identifiers: [String], assets: PHFetchResult<PHAsset>) -> PhotoPickerEvent {
         let containerList = selectImageContainerSubject.value
         if Set(identifiers) == Set(containerList.compactMap({ $0 }).map(\.id)) && identifiers.count == frameType.frameCount {

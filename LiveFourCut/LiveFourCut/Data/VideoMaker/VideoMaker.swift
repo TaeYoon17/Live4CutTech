@@ -1,5 +1,5 @@
 //
-//  VideoMakerService.swift
+//  VideoMaker.swift
 //  LiveFourCut
 //
 //  Created by Greem on 9/7/25.
@@ -9,51 +9,15 @@ import Foundation
 import CoreGraphics
 import AVFoundation
 
-protocol VideMakerProtocol: Sendable {
-    func transpose(_ matrix: inout [[CGImage]])
-    ///    func reduce(images: [CGImage], spacing:CGFloat) throws -> CGImage
-    /// [[frameType 별 이미지 배열]] -> Frame 계수
-    func run(groupImage: inout [[CGImage]], outputURL: URL) throws -> AsyncThrowingStream<Double, Error>
-}
-enum VideoMakerError: Error {
-    case faileToCreatePixelBuffer
-    case memoryPeak
-    case emptyImage
-    case noneMatchFrameMode
-}
-
-extension VideMakerProtocol {
-    func transpose(_ matrix: inout [[CGImage]]) {
-        let rows = matrix.count
-        let cols = matrix[0].count
-        
-        // 새로운 배열을 미리 할당하되, 필요한 크기만큼만
-        var transposed: [[CGImage]] = []
-        transposed.reserveCapacity(cols)
-        
-        for j in 0..<cols {
-            var newRow: [CGImage] = []
-            newRow.reserveCapacity(rows)
-            
-            for i in 0..<rows {
-                newRow.append(matrix[i][j])
-            }
-            transposed.append(newRow)
-        }
-        
-        matrix = transposed
-    }
-}
-
-final class VideoMaker: VideMakerProtocol {
-    private let memoryWarningService: MemoryWarningServiceProtocol
-    private let frameService: FrameServiceProtocol
+final class VideoMaker: VideoMakerProtocol {
+    private let memoryWarningService: MemoryWarningProtocol
+    private let frameGenerator: FrameGeneratorProtocol
     
     init(
-        memoryWarningService: MemoryWarningServiceProtocol,
-        frameService: FrameServiceProtocol
+        memoryWarningService: MemoryWarningProtocol,
+        frameGenerator: FrameGeneratorProtocol
     ) {
-        self.frameService = frameService
+        self.frameGenerator = frameGenerator
         self.memoryWarningService = memoryWarningService
     }
     
@@ -61,10 +25,10 @@ final class VideoMaker: VideMakerProtocol {
         self.transpose(&groupImage)
         groupImage.reverse()
         guard let firsTimeImage = groupImage.first,
-              let reduceImage = try? self.frameService.reduce(images: firsTimeImage) else {
+              let reduceImage = try? self.frameGenerator.reduce(images: firsTimeImage) else {
             throw VideoMakerError.emptyImage
         }
-        guard firsTimeImage.count == frameService.frameType.frameCount else {
+        guard firsTimeImage.count == frameGenerator.frameType.frameCount else {
             throw VideoMakerError.noneMatchFrameMode
         }
         
@@ -92,7 +56,7 @@ final class VideoMaker: VideMakerProtocol {
                         while !writerInput.isReadyForMoreMediaData { }
                         var pixelBuffer: CVPixelBuffer?
                         let singleFrameImages: [CGImage] = groupImage.removeLast()
-                        guard let reduceImage = try? frameService.reduce(images: singleFrameImages) else {
+                        guard let reduceImage = try? frameGenerator.reduce(images: singleFrameImages) else {
                             assertionFailure("왜 없음?")
                             return
                         }
@@ -154,6 +118,7 @@ final class VideoMaker: VideMakerProtocol {
         return (writer, writerInput, adaptor)
     }
 }
+
 extension AVAssetWriter: @unchecked @retroactive Sendable { }
 extension AVAssetWriterInput: @unchecked @retroactive Sendable { }
 extension AVAssetWriterInputPixelBufferAdaptor: @unchecked @retroactive Sendable { }
