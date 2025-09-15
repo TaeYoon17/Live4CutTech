@@ -38,8 +38,13 @@ final class PhotoSelectionViewModel: @preconcurrency ThumbnailSelectorProtocol {
      // MARK: - Properties
     let frameType: FrameType
     
-    @Dependency private var thumbnailExecutor: ThumbnailExecutorProtocol
-    @Dependency private var videoExecutor: VideoExecutorProtocol
+    
+    @Dependency
+    private var thumbnailExecutor: ThumbnailExecutorProtocol
+    
+    @Dependency
+    private var videoExecutor: VideoExecutorProtocol
+    
     private var cancellables = Set<AnyCancellable>()
     
     init(frameType: FrameType) {
@@ -55,7 +60,6 @@ final class PhotoSelectionViewModel: @preconcurrency ThumbnailSelectorProtocol {
         config.filter = .livePhotos
         config.selectionLimit = frameType.frameCount
         config.selection = .ordered
-        
         let containerList = selectImageContainerSubject.value
         config.preselectedAssetIdentifiers = containerList.compactMap { $0?.id }
         self.pickerEventSubject.send(.openPhotoPicker(config))

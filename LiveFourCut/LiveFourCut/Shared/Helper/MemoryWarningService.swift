@@ -14,39 +14,24 @@ protocol MemoryWarningProtocol: Sendable {
     var isMemoryWarning: Bool { get async }
 }
 
-actor MemoryWarningActor: MemoryWarningProtocol {
+final actor MemoryWarningActor: MemoryWarningProtocol {
     var isMemoryWarning: Bool = false
     
-    @MainActor
-    private var cancellables = Set<AnyCancellable>()
-    
-    @MainActor
     init(releaseSeconds: Double = 1.0) {
-        setUp()
-    }
-    
-    @MainActor func setUp(releaseSeconds: Double = 1.0) {
-        NotificationCenter.default
-            .publisher(for: UIApplication.didReceiveMemoryWarningNotification)
-            .sink { [weak self] _ in
-                guard let self else {
-                    return
-                }
-                
-                Task {
-                    await self.setMemoryWarning(true)
-                }
-                
-                // 1초 후 상태를 되돌리기 위해 Task를 사용
-                Task {
-                    try await Task.sleep(for: .seconds(releaseSeconds))
-                    await self.setMemoryWarning(false)
-                }
+        Task {
+            for await _ in NotificationCenter.default.notifications(named: UIApplication.didReceiveMemoryWarningNotification)  {
+                await self.setMemoryWarning(true)
+                try await Task.sleep(for: .seconds(releaseSeconds))
+                await self.setMemoryWarning(false)
             }
-            .store(in: &cancellables)
+        }
     }
     
     private func setMemoryWarning(_ value: Bool) {
         self.isMemoryWarning = value
     }
 }
+
+
+
+        

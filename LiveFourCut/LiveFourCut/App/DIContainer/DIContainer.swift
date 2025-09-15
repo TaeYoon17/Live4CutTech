@@ -64,6 +64,7 @@ extension Container {
         
     }
 }
+
 extension Container {
     private static func frameGenerateorRegister(container: Container) {
         container.register(FrameGeneratorProtocol.self, name: FrameType.basic2x2.name) { resolver in
@@ -71,5 +72,4 @@ extension Container {
         }
     }
 }
-
 
