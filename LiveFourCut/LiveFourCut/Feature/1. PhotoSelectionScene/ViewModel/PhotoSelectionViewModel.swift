@@ -10,6 +10,7 @@ import UIKit
 import Combine
 import PhotosUI
 
+
 @MainActor
 final class PhotoSelectionViewModel: @preconcurrency ThumbnailSelectorProtocol {
     // MARK: - Published Properties
@@ -37,7 +38,6 @@ final class PhotoSelectionViewModel: @preconcurrency ThumbnailSelectorProtocol {
     
      // MARK: - Properties
     let frameType: FrameType
-    
     
     @Dependency
     private var thumbnailExecutor: ThumbnailExecutorProtocol

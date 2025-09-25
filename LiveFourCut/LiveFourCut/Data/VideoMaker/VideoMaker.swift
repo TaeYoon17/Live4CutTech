@@ -44,19 +44,19 @@ final class VideoMaker: VideoMakerProtocol {
             
             let maxFrameCount: Int = groupImage.count
             
-            Task { @Sendable in
+            Task.detached {
                 var frameCount: Int = 0
                 var groupImage = copiedGroupImage
                 let fps = 24
                 writer.startWriting()
                 writer.startSession(atSourceTime: .zero)
                 while groupImage.isEmpty == false {
-                    while await memoryWarningService.isMemoryWarning { }
+                    while await self.memoryWarningService.isMemoryWarning { }
                     try autoreleasepool { // CVPixelBuffer가 쌓이지 않도록
                         while !writerInput.isReadyForMoreMediaData { }
                         var pixelBuffer: CVPixelBuffer?
                         let singleFrameImages: [CGImage] = groupImage.removeLast()
-                        guard let reduceImage = try? frameGenerator.reduce(images: singleFrameImages) else {
+                        guard let reduceImage = try? self.frameGenerator.reduce(images: singleFrameImages) else {
                             assertionFailure("왜 없음?")
                             return
                         }

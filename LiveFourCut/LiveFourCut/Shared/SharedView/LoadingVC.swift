@@ -6,6 +6,7 @@
 //
 import UIKit
 import SnapKit
+
 class LoadingVC: BaseVC {
     var loadingAlertView: UIAlertController?
     var loadingProgressView: UIProgressView?

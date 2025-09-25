@@ -9,9 +9,15 @@ import UIKit
 import Combine
 import CoreMedia
 
+@MainActor
+protocol CutsPreViewControllerDelegate: AnyObject {
+    func pushSharingViewController(frameType: FrameType, videoURL: URL)
+    func popCutsPreViewController()
+}
+
 final class FourCutPreViewController: BaseVC {
     // MARK: -- Service 연결
-    
+    weak var coordinator: CutsPreViewControllerDelegate?
     @Dependency private var extractService: VideoFrameExtractorProtocol
     let videoMaker: VideoMakerProtocol
     
@@ -83,7 +89,7 @@ final class FourCutPreViewController: BaseVC {
             .sink { [weak self] event in
                 guard let self else { return }
                 switch event {
-                case .navigationBack: navigationController?.popViewController(animated: true)
+                case .navigationBack: self.coordinator?.popCutsPreViewController()
                 case .shareStart:
                     makingVideo { [weak self] in
                         guard let self else { return }
@@ -96,9 +102,7 @@ final class FourCutPreViewController: BaseVC {
                         guard let self else { return }
                         self.view.isUserInteractionEnabled = true
                         progressAlertPresenter.progressWaitStop()
-                        let sharingViewController = SharingViewController(frameType: frameType, videoURL: outputURL)
-                        self.navigationController?.isNavigationBarHidden = true
-                        self.navigationController?.pushViewController(sharingViewController, animated: true)
+                        coordinator?.pushSharingViewController(frameType: frameType, videoURL: outputURL)
                     } failed: { [weak self] error in
                         guard let self else { return }
                         self.view.isUserInteractionEnabled = true
@@ -167,7 +171,10 @@ final class FourCutPreViewController: BaseVC {
                 
                 try await Task.sleep(for: .milliseconds(10))
                 
-                for try await progressCount in try videoMaker.run(groupImage: &frameImages, outputURL: outputURL) {
+                for try await progressCount in try videoMaker.run(
+                    groupImage: &frameImages,
+                    outputURL: outputURL
+                ) {
                     if Task.isCancelled { return }
                     progress(progressCount)
                 }

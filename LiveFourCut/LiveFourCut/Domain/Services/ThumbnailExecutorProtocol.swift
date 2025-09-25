@@ -12,6 +12,8 @@ import Photos
 protocol ThumbnailExecutorProtocol {
     var itemsSubject: PassthroughSubject<[ImageContainer], Never> { get }
     var progressSubject: PassthroughSubject<Float, Never>  { get }
+    
     func setFetchResult(result: PHFetchResult<PHAsset>)
+    
     func run()
 }

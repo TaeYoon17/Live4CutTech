@@ -40,9 +40,11 @@ actor VideoExecutor: VideoExecutorProtocol {
         self.continuation = continuation
         self.executeStream = stream
     }
+    
     func setFetchResult(result: PHFetchResult<PHAsset>) {
         self.result = result
     }
+    
     func run() async {
         // 여기 락 처리를 안했는데 괜찮을까?
         var fetchAssets: [PHAssetResource] = []
@@ -104,7 +106,7 @@ actor VideoExecutor: VideoExecutorProtocol {
 }
 
 extension VideoExecutor {
-    fileprivate func moveAssetDirToTempDir(urlAsset: inout AVURLAsset) async throws -> URL{
+    fileprivate func moveAssetDirToTempDir(urlAsset: inout AVURLAsset) async throws -> URL {
         let lastComponent = urlAsset.url.lastPathComponent
         let tempFileURL = FileManager().temporaryDirectory.appendingPathComponent(lastComponent)
         if FileManager.default.fileExists(atPath: tempFileURL.path()) {

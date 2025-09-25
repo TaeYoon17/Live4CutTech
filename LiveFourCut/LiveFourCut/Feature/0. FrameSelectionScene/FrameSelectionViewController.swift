@@ -9,10 +9,17 @@ import UIKit
 import Combine
 import Photos
 
+@MainActor
+protocol FrameSelectonViewControllerDelegate: AnyObject, Coordinator {
+    func pushPhotoSelectionViewController(frameType: FrameType)
+    func showAlert(for status: AlbumAuthorization)
+}
+
 final class FrameSelectionViewController: UIViewController {
+    weak var coordinator: FrameSelectonViewControllerDelegate?
+    
     // MARK: - Properties
     private let contentView = FrameSelectionView()
-    private lazy var alertPresenter = FrameSelectionAlertPresenter(viewController: self)
     
     @Dependency private var checkPhotoAuthUseCase: CheckPhotoAuthUseCase
     @Dependency private var requestPhotoAuthUseCase: RequestPhotoAuthUseCase
@@ -43,7 +50,8 @@ final class FrameSelectionViewController: UIViewController {
             .sink { [weak self] event in
             guard let self else { return }
             switch event {
-            case .frameSelected(let frameType): frameStackViewTapped(frameType: frameType)
+            case .frameSelected(let frameType):
+                frameStackViewTapped(frameType: frameType)
             }
         }.store(in: &cancellable)
     }
@@ -71,42 +79,16 @@ final class FrameSelectionViewController: UIViewController {
                     guard let self else { return }
                     goToSelectPhotos(frameType: frameType)
                 }
-            default: await showAlert(for: newStatus)
+            default: coordinator?.showAlert(for: newStatus)
             }
-        case .showSettingsAlert: await showAlert(for: currentStatus)
-        case .showErrorAlert: await showAlert(for: currentStatus)
+        case .showSettingsAlert:
+            coordinator?.showAlert(for: currentStatus)
+        case .showErrorAlert: coordinator?.showAlert(for: currentStatus)
         }
     }
     
-    /// 권한 상태에 따른 알림창을 표시하는 메서드
-    private func showAlert(for status: AlbumAuthorization) async {
-        guard let alertInfo = status.alertInfo else { return }
-        switch status.actionType {
-        case .showSettingsAlert:
-            self.alertPresenter.presentSettingsAlert(
-                title: alertInfo.title,
-                message: alertInfo.message
-            ) {
-                guard let appSettings = URL(string: UIApplication.openSettingsURLString) else { return }
-                UIApplication.shared.open(appSettings)
-            }
-        case .showErrorAlert:
-            self.alertPresenter.presentErrorAlert(
-                title: alertInfo.title,
-                message: alertInfo.message
-            )
-        default: return
-        }
-    }
     
     private func goToSelectPhotos(frameType: FrameType) {
-        let photoSelectionViewController = PhotoSelectionViewController(
-            viewModel: PhotoSelectionViewModel(frameType: frameType)
-        )
-        navigationController?.pushViewController(
-            photoSelectionViewController,
-            animated: true)
+        coordinator?.pushPhotoSelectionViewController(frameType: frameType)
     }
 }
-
-

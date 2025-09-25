@@ -11,7 +11,18 @@ import Combine
 import Photos
 import PhotosUI
 
+@MainActor
+protocol PhotoSelectonViewControllerDelegate: AnyObject, Coordinator {
+    func pushPreViewController(
+        minDuration: Double,
+        frameType: FrameType,
+        avAssetContainer: [AVAssetContainer]
+    )
+    func popPhotoSelectionViewController()
+}
+
 final class PhotoSelectionViewController: LoadingVC {
+    weak var coordinator: PhotoSelectonViewControllerDelegate?
     
     @Dependency private var videoMakerFactory: VideoMakerFactoryProtocol
     
@@ -57,7 +68,7 @@ final class PhotoSelectionViewController: LoadingVC {
         contentView.eventPublisher.sink { [weak self] event in
             guard let self else { return }
             switch event {
-            case .navigationBack: navigationController?.popViewController(animated: true)
+            case .navigationBack: coordinator?.popPhotoSelectionViewController()
             case .selectDone:
                 presentLoadingAlert(message: "라이브 포토 영상으로 변환 중...", cancelAction: {})
                 viewModel.executeVideoFetch()
@@ -102,14 +113,11 @@ final class PhotoSelectionViewController: LoadingVC {
                 guard let self else { return }
                 dismissLoadingAlert { [weak self] in
                     guard let self else { return }
-                    let frameGenerator = Frame2x2Generator(width: 480, spacing: 8)
-                    let vc = FourCutPreViewController(
+                    coordinator?.pushPreViewController(
                         minDuration: Double(minDuration),
                         frameType: viewModel.frameType,
-                        videoMaker: videoMakerFactory.makeVideoMaker(frameGenerator: frameGenerator), // 여기 값 전달이 좀 아쉽다...
-                        avAssetContainers: container
+                        avAssetContainer: container
                     )
-                    navigationController?.pushViewController(vc, animated: true)
                 }
             }.store(in: &cancellable)
     }

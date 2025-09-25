@@ -9,7 +9,15 @@ import UIKit
 import AVFoundation
 import Combine
 
+@MainActor
+protocol SharingViewControllerDelegate: AnyObject {
+    func popSharingViewController()
+    func showShareActivity(url: URL)
+}
+
 final class SharingViewController: BaseVC {
+    weak var coordinator: SharingViewControllerDelegate?
+    
     private lazy var contentView = SharingView(frameType: frameType)
     let frameType: FrameType
     var videoURL: URL?
@@ -19,20 +27,26 @@ final class SharingViewController: BaseVC {
     
     private var cancellables = Set<AnyCancellable>()
     
-    init(frameType: FrameType, videoURL: URL) {
+    init(
+        frameType: FrameType,
+        videoURL: URL
+    ) {
         self.videoURL = videoURL
         self.frameType = frameType
         super.init(nibName: nil, bundle: nil)
     }
     
-    @MainActor required init?(coder: NSCoder) {
+    @MainActor
+    required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+    
     // MARK: - Deinitializer
     deinit {
         queuePlayer.pause()
         self.looper = nil
     }
+    
     // MARK: - Life Cycle
     override func loadView() {
         self.view = contentView
@@ -48,10 +62,12 @@ final class SharingViewController: BaseVC {
         self.playerLayer?.frame = self.contentView.videoFrameView.bounds
         self.playerLayer?.videoGravity = .resizeAspect
     }
+    
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         self.navigationController?.isNavigationBarHidden = true
     }
+    
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         self.navigationController?.isNavigationBarHidden = true
@@ -63,16 +79,12 @@ final class SharingViewController: BaseVC {
                 guard let self else { return }
                 switch event {
                 case .navigationBack:
-                    self.navigationController?.popViewController(animated: true)
-                case .shareStart: showShareActivity()
+                    self.coordinator?.popSharingViewController()
+                case .shareStart:
+                    guard let url = videoURL else { return }
+                    self.coordinator?.showShareActivity(url: url)
                 }
             }.store(in: &cancellables)
-    }
-    
-    private func showShareActivity() {
-        guard let url = videoURL else { return }
-        let activityViewController = UIActivityViewController(activityItems: [url], applicationActivities: nil)
-        present(activityViewController, animated: true)
     }
     
     private func setupPlayer() {
